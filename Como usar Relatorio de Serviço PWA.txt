@@ -1,0 +1,207 @@
+Aqui está uma mensagem completa, acolhedora e bem didática para enviar no WhatsApp ou Telegram, com o **passo a passo exato de como instalar no Android e no iPhone**:
+
+---
+
+### 📲 Mensagem Completa Pronta para Enviar
+
+> Olá, irmãos e amigos! Tudo bem? 😊
+>
+> Desenvolvi um aplicativo prático, leve e gratuito para nos ajudar no ministério de campo: o **Relatório de Serviço** 🟦.
+>
+> Criei ele pensando em resolver coisas do dia a dia com foco em **total privacidade e simplicidade**:
+> 
+> ✨ **Por que vale a pena usar?**
+> • **100% Privado:** Não precisa de conta, e-mail nem senha. Seus registros ficam salvos somente na memória do seu próprio celular.
+> • **Funciona Sem Internet:** Registre horas e estudos mesmo em áreas rurais ou sem sinal.
+> • **Entrega Rápida do Relatório:** Copia o relatório do mês já formatado com 1 toque, pronto para você colar no WhatsApp do secretário da congregação.
+> • **Alinhado com as orientações:** Se for publicador, não exige horas (apenas estudos). Se sair de pioneiro auxiliar no mês (inclusive campanha de 15h) ou for regular, ele calcula as metas certinho.
+> • **Conforto Visual:** Opção de aumentar a letra para facilitar a leitura no campo e temas claro/escuro.
+>
+> ---
+>
+> 🚀 **COMO INSTALAR NO SEU CELULAR (Leva menos de 1 minuto):**
+> 
+> Primeiro, acesse o link abaixo pelo navegador do seu celular:
+> 👉 **https://antonionovaesjr.com.br/relatorio-servicos/**
+> 
+> **📱 No Celular Android (pelo Google Chrome):**
+> 1. Com o site aberto, toque nos **3 pontinhos (⋮)** no canto superior direito.
+> 2. Procure e toque na opção **"Instalar aplicativo"** (ou *"Adicionar à tela inicial"*).
+> 3. Confirme em **Instalar**. Pronto! O ícone vai direto para a tela inicial do seu celular como um app normal.
+>
+> **🍏 No iPhone / iPad (pelo Safari):**
+> 1. Com o site aberto no Safari, toque no botão de **Compartilhar** *(ícone de um quadrado com uma setinha para cima ⎋ na barra inferior)*.
+> 2. Role as opções para baixo e toque em **"Adicionar à Tela de Início"** *(com ícone de um quadradinho com o sinal de +)*.
+> 3. Toque em **Adicionar** no canto superior direito. Pronto! O aplicativo já estará instalado entre seus apps.
+>
+> ---
+>
+> Gostaria muito de convidar vocês para serem **usuários beta**. Usem no dia a dia e, se puderem me dar um feedback ou sugestões, me ajudará muito a continuar melhorando! 🤝
+>
+> Um abraço! 	
+
+
+
+Abaixo está a explicação completa e detalhada de **como cada tela e funcionalidade do Relatório de Serviço PWA funciona**:
+
+---
+
+# 📱 Manual Completo do Aplicativo — Telas e Recursos
+
+O **Relatório de Serviço PWA** foi desenvolvido sob o conceito *offline-first*, com foco em simplicidade, privacidade total (seus dados nunca saem do seu aparelho) e conformidade estrita com as orientações teocráticas atuais.
+
+---
+
+## 🧭 Navegação Geral e Cabeçalho
+
+### Cabeçalho Superior
+- **Identidade Visual:** Destaque institucional em tom **Midnight Blue** (`#001E62`).
+- **Botão de Tema (Sol / Lua):** Permite alternar rapidamente entre o Modo Claro e o Modo Escuro com apenas um toque, em qualquer tela.
+- **Aviso de Privacidade:** Indica que o aplicativo opera 100% offline e local no aparelho.
+
+### Barra de Navegação Inferior
+Inspirada nos aplicativos mensageiros mais modernos, ela conta com 4 abas e um botão central em destaque:
+1. **🏠 Início:** Visão geral do ano de serviço e metas.
+2. **📋 Relatório:** Lançamentos do mês, edições e cópia para envio.
+3. **➕ Botão Central:** Acesso rápido permanente para registrar horas/atividades do dia.
+4. **ℹ️ Ajuda:** Guia explicativo das regras e cálculos.
+5. **⚙️ Configurações:** Perfil, designação teocrática, tamanho de letra, idioma e backups.
+
+---
+
+## 1. 🏠 Tela: Início (Home)
+
+A tela inicial funciona como o painel de bordo anual do publicador ou pioneiro.
+
+- **Resumo do Ano de Serviço:**
+  - Identifica o ano de serviço corrente (de 1º de setembro a 31 de agosto).
+  - Apresenta quatro cartões de métricas consolidadas:
+    1. **Estudos Bíblicos:** Total de estudos bíblicos diferentes dirigidos.
+    2. **Total de Horas:** Soma total das horas e minutos acumulados (`hh:mm`).
+    3. **Dias de Campo:** Quantidade de dias em que você participou do ministério.
+    4. **Faltam para a Meta:**
+       - **Se for Publicador:** Exibe a sigla **N/A** (Não se Aplica), pois publicadores comuns não têm requisito de horas.
+       - **Se for Pioneiro Auxiliar:** Calcula automaticamente quanto tempo falta para cumprir o requisito **no mês corrente vigente** (30 horas ou 15 horas em campanhas especiais de 50%).
+       - **Se for Pioneiro Regular:** Calcula o saldo de horas restante para completar a meta do ano de serviço (ex: 600h).
+- **Gráfico Mensal Interativo:**
+  - Um gráfico em barras verticais mostra o volume de horas de cada mês do ano de serviço.
+  - **Interatividade:** Tocar na barra de qualquer mês leva você diretamente para o relatório detalhado daquele período.
+- **Atalhos Rápidos:**
+  - Botão para iniciar um novo lançamento ou conferir o relatório do mês.
+
+---
+
+## 2. 📋 Tela: Relatório Mensal (Report)
+
+Esta é a tela de controle do mês e onde você prepara o relatório para entrega.
+
+- **Seletor de Mês e Ano:**
+  - Use as setas `◀` e `▶` para navegar entre os meses anteriores e seguintes. Você pode consultar históricos passados ou realizar lançamentos com datas retroativas.
+- **Cards de Resumo do Mês:**
+  - **Horas do Mês:** Total de tempo dedicado no mês selecionado.
+  - **Estudos Bíblicos:** Quantidade de estudos registrados no período.
+- **Lista Cronológica de Lançamentos Diários:**
+  - Cada dia em que você saiu ao campo aparece como um cartão individual com:
+    - Data formatada.
+    - Horas e minutos daquele dia.
+    - Estudos dirigidos naquele dia.
+    - Anotações/observações feitas.
+- **Correção de Lançamentos em Caso de Erro:**
+  - **Botão Editar (Ícone de Lápis ✏️):** Abre o formulário com todos os dados preenchidos daquele dia, permitindo corrigir minutos, estudos ou anotações instantaneamente.
+  - **Botão Excluir (Ícone de Lixeira 🗑️):** Permite apagar um lançamento incorreto com confirmação de segurança.
+- **Botão "Compartilhar / Copiar Relatório":**
+  - Abre a janela de cópia com formatação pronta para envio ao secretário da congregação.
+
+---
+
+## 3. ➕ Modal: Registrar Dia de Serviço (Lançamento Diário)
+
+Acessado pelo botão central `➕` ou pelo botão de edição:
+
+- **Data da Atividade:** Campo de calendário que vem preenchido por padrão com a data de hoje.
+- **Contador de Horas e Minutos:**
+  - Digitação direta de horas e minutos.
+  - **Botões de Atalho Rápido:** Adicione facilmente `+15 min`, `+30 min` ou `+1 hora` com um único toque.
+- **Estudos Bíblicos:** Botões de incremento e decremento (`+` e `-`).
+- **Anotações do Dia:** Campo livre para você anotar pessoas revisitadas, pontos de partida ou lembretes pessoais (essas notas diárias são privadas e **nunca** são enviadas no relatório final compartilhado).
+- **Gravação Offline:** Ao clicar em Salvar, o registro é gravado imediatamente no banco de dados local do seu navegador/celular (IndexedDB).
+
+---
+
+## 4. 📋 Modal: Compartilhar / Copiar Relatório
+
+Projetado especificamente para envio ao secretário da congregação:
+
+- **Pré-visualização do Texto:**
+  - Mostra com exatidão como o texto será copiado.
+- **Opções Teocráticas Dinâmicas do Mês (Somente para Publicadores):**
+  - **Checkbox "Mês como pioneiro auxiliar":** Se naquele mês você entregou a petição de pioneiro auxiliar, marque esta caixa.
+  - **Checkbox "50% (mês especial)":** Se for um mês de visita do superintendente ou campanha especial de 15 horas, marque esta opção.
+- **Regra Teocrática no Texto Copiado:**
+  - **Para Publicador Comum:** As linhas de *Total de horas* e *Pioneiro auxiliar: ☐ Não* são **totalmente omitidas**, gerando um texto limpo e direto:
+    ```text
+    RELATÓRIO DE SETEMBRO DE 2026
+    ────────────────────────────────
+    Publicador: Seu Nome
+    Total de estudos: 0
+    ────────────────────────────────
+    Gerado pelo Relatório de Serviço PWA 🟦
+    ```
+  - **Para Pioneiros (Auxiliar ou Regular):** O relatório inclui o total de horas e a confirmação de pioneiro:
+    ```text
+    RELATÓRIO DE SETEMBRO DE 2026
+    ────────────────────────────────
+    Publicador: Seu Nome
+    Total de estudos: 1
+    Total de horas: 30:15
+    Pioneiro auxiliar: ☑ Sim
+    ────────────────────────────────
+    Gerado pelo Relatório de Serviço PWA 🟦
+    ```
+- **Botão "Copiar Relatório":**
+  - O aplicativo não força o compartilhamento por um único meio. Ele copia o texto para a sua área de transferência com feedback tátil (vibração suave) e visual (`Copiado com Sucesso!`), permitindo que você cole no WhatsApp, SMS, E-mail ou Telegram.
+
+---
+
+## 5. ℹ️ Tela: Ajuda (Help)
+
+Um guia prático integrado ao aplicativo que ensina:
+- O significado e o funcionamento de cada métrica.
+- As regras de cálculo para Publicadores, Pioneiros Auxiliares e Pioneiros Regulares.
+- Como funciona a privacidade local (sem contas na nuvem e sem rastreamento de dados).
+- Instruções passo a passo para instalar o aplicativo no celular (adicionar à tela inicial no Android e no iPhone/iPad).
+
+---
+
+## 6. ⚙️ Tela: Configurações (Settings)
+
+Central de personalização do aplicativo:
+
+- **🔤 Tamanho da Fonte da Letra:**
+  - Oferece 4 níveis de tamanho: **Pequena**, **Padrão**, **Grande** e **Extra Grande**.
+  - Permite leitura confortável para pessoas de qualquer idade diretamente em campo.
+- **👤 Perfil do Publicador:**
+  - **Nome:** Seu nome (usado opcionalmente na identificação do relatório copiado).
+  - **Foto de Perfil:** Escolha uma foto do seu dispositivo para personalizar o aplicativo.
+- **🏛️ Designação Teocrática:**
+  - **Publicador:** Sem requisito obrigatório de horas. Permite ativar pioneiro auxiliar mês a mês na tela de relatório.
+  - **Pioneiro Auxiliar:** Ativa o cálculo da meta de 30 horas (ou 15h) no mês vigente.
+  - **Pioneiro Regular:** Ativa o controle anual de horas.
+- **🎯 Meta Anual de Pioneiro Regular:**
+  - Campo numérico para definir a meta do ano de serviço (por padrão, 600 horas).
+- **⚙️ Preferências de Interface:**
+  - **Idioma:** Seleção instantânea entre **Português**, **English** e **Español** sem necessidade de recarregar a página.
+  - **Tema:** Seleção entre Automático (Sistema), Claro ou Escuro.
+- **💾 Backup & Restauração:**
+  - **Fazer Backup (.rsvpwa):** Gera um arquivo protegido para download contendo todos os seus registros, estudos, relatórios e preferências.
+  - **Restaurar Backup:** Permite carregar um arquivo `.rsvpwa` e transferir seus dados facilmente ao trocar de aparelho.
+- **🗑️ Limpar Base de Dados:**
+  - Botão de segurança com modal de dupla confirmação para apagar com segurança todos os dados e restaurar o aplicativo aos padrões originais se desejado.
+
+---
+
+## 🚀 Dica de Instalação no Celular (PWA)
+
+O aplicativo funciona como um app nativo no celular:
+- **No Android (Google Chrome):** Toque no menu de 3 pontos `⋮` do navegador e selecione **"Instalar aplicativo"** ou **"Adicionar à tela inicial"**.
+- **No iPhone / iPad (Safari):** Toque no botão de compartilhar (ícone de quadrado com seta para cima `⎋`) e selecione **"Adicionar à Tela de Início"**.

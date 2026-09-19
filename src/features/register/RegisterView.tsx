@@ -139,16 +139,16 @@ export const RegisterView: React.FC = () => {
   return (
     <div className="space-y-4 pb-6 animate-fade-in">
       {/* 🟢 CARD PRINCIPAL: NOVO LANÇAMENTO */}
-      <section className="bg-white dark:bg-[#1F2C34] rounded-xl p-4 shadow-sm border border-[#E9EDEF] dark:border-[#2A3942]">
-        <div className="flex items-center justify-between pb-3 border-b border-[#E9EDEF] dark:border-[#2A3942]">
+      <section className="bg-white dark:bg-[#111A29] rounded-xl p-4 shadow-sm border border-[#E9EDEF] dark:border-[#1F2E44]">
+        <div className="flex items-center justify-between pb-3 border-b border-[#E9EDEF] dark:border-[#1F2E44]">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#01D65A]" />
-            <h2 className="text-sm font-bold text-[#008069] dark:text-[#01D65A] tracking-wider uppercase">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#001E62] dark:bg-[#60A5FA]" />
+            <h2 className="text-sm font-bold text-[#001E62] dark:text-[#93C5FD] tracking-wider uppercase">
               Novo Lançamento Diário
             </h2>
           </div>
           {saveSuccess && (
-            <div className="flex items-center gap-1 text-xs text-[#019444] dark:text-[#01D65A] font-semibold bg-[#01D65A]/10 px-2 py-0.5 rounded-md">
+            <div className="flex items-center gap-1 text-xs text-emerald-700 dark:text-emerald-300 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded-md">
               <CheckCircle2 className="w-3.5 h-3.5" />
               <span>Salvo!</span>
             </div>
@@ -158,7 +158,7 @@ export const RegisterView: React.FC = () => {
         <form onSubmit={handleSaveDaily} className="space-y-4 pt-3.5">
           {/* 📅 Data do Lançamento */}
           <div>
-            <label className="block text-xs font-semibold text-[#657484] dark:text-[#8696A0] mb-1">
+            <label className="block text-xs font-semibold text-[#657484] dark:text-[#CBD5E1] mb-1">
               📅 Data do Serviço
             </label>
             <div className="relative">
@@ -167,7 +167,7 @@ export const RegisterView: React.FC = () => {
                 required
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full bg-[#F0F2F5] dark:bg-[#111B26] text-slate-900 dark:text-[#E9EDEF] px-3.5 py-2.5 rounded-xl border border-[#E9EDEF] dark:border-[#2A3942] text-sm focus:outline-none focus:ring-2 focus:ring-[#01D65A] transition-colors"
+                className="w-full bg-[#F0F2F5] dark:bg-[#0B1320] text-slate-900 dark:text-[#F8FAFC] px-3.5 py-2.5 rounded-xl border border-[#E9EDEF] dark:border-[#25364E] text-sm focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6] transition-colors"
               />
             </div>
           </div>
@@ -175,10 +175,10 @@ export const RegisterView: React.FC = () => {
           {/* ⏱️ Horas do Dia com Incrementos Rápidos */}
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-semibold text-[#657484] dark:text-[#8696A0]">
+              <label className="text-xs font-semibold text-[#657484] dark:text-[#CBD5E1]">
                 ⏱️ Tempo no Ministério (hh:mm)
               </label>
-              <span className="text-xs text-[#008069] dark:text-[#01D65A] font-bold">
+              <span className="text-xs text-[#001E62] dark:text-[#93C5FD] font-bold">
                 {Math.floor(totalMinutes / 60)}h {totalMinutes % 60}m
               </span>
             </div>
@@ -190,7 +190,7 @@ export const RegisterView: React.FC = () => {
                 value={timeInput}
                 onChange={(e) => setTimeInput(e.target.value)}
                 placeholder="00:00"
-                className="w-full text-center font-mono text-2xl font-bold bg-[#F0F2F5] dark:bg-[#111B26] text-[#008069] dark:text-[#01D65A] py-2.5 rounded-xl border-2 border-[#E9EDEF] dark:border-[#2A3942] focus:outline-none focus:border-[#01D65A] tracking-widest"
+                className="w-full text-center font-mono text-2xl font-bold bg-[#F0F2F5] dark:bg-[#0B1320] text-[#001E62] dark:text-[#93C5FD] py-2.5 rounded-xl border-2 border-[#E9EDEF] dark:border-[#25364E] focus:outline-none focus:border-[#001E62] dark:focus:border-[#3B82F6] tracking-widest"
               />
             </div>
 
@@ -207,7 +207,7 @@ export const RegisterView: React.FC = () => {
                   key={btn.label}
                   type="button"
                   onClick={() => handleAddMinutes(btn.value)}
-                  className="py-1.5 text-xs font-bold rounded-lg bg-[#E1FFD2] dark:bg-[#005C4B]/60 text-[#008069] dark:text-[#01D65A] hover:bg-[#01D65A] hover:text-white transition-colors active:scale-95 border border-[#01D65A]/20"
+                  className="py-1.5 text-xs font-bold rounded-lg bg-[#E8EEF8] dark:bg-[#172554] text-[#001E62] dark:text-[#93C5FD] hover:bg-[#001E62] hover:text-white dark:hover:bg-[#1D4ED8] transition-colors active:scale-95 border border-[#001E62]/20 dark:border-[#3B82F6]/30"
                 >
                   {btn.label}
                 </button>
@@ -226,9 +226,9 @@ export const RegisterView: React.FC = () => {
           {/* Contadores do Dia (Grid 2 colunas com Steppers) */}
           <div className="grid grid-cols-2 gap-2.5 pt-1">
             {/* Estudos Bíblicos */}
-            <div className="bg-[#F0F2F5] dark:bg-[#111B26] p-2.5 rounded-xl border border-[#E9EDEF] dark:border-[#2A3942]">
-              <div className="flex items-center gap-1.5 text-xs text-[#657484] dark:text-[#8696A0] font-semibold mb-1.5">
-                <BookOpen className="w-3.5 h-3.5 text-[#008069] dark:text-[#01D65A]" />
+            <div className="bg-[#F0F2F5] dark:bg-[#0B1320] p-2.5 rounded-xl border border-[#E9EDEF] dark:border-[#25364E]">
+              <div className="flex items-center gap-1.5 text-xs text-[#657484] dark:text-[#CBD5E1] font-semibold mb-1.5">
+                <BookOpen className="w-3.5 h-3.5 text-[#001E62] dark:text-[#60A5FA]" />
                 <span>Estudos Bíblicos</span>
               </div>
               <div className="flex items-center justify-between">
@@ -238,11 +238,11 @@ export const RegisterView: React.FC = () => {
                     triggerHaptic(5);
                     setBibleStudies((p) => Math.max(0, p - 1));
                   }}
-                  className="w-8 h-8 rounded-lg bg-white dark:bg-[#1F2C34] text-slate-700 dark:text-slate-200 font-bold flex items-center justify-center shadow-xs border border-[#E9EDEF] dark:border-[#2A3942] active:scale-95"
+                  className="w-8 h-8 rounded-lg bg-white dark:bg-[#111A29] text-slate-700 dark:text-slate-200 font-bold flex items-center justify-center shadow-xs border border-[#E9EDEF] dark:border-[#25364E] active:scale-95"
                 >
                   -
                 </button>
-                <span className="font-bold text-base text-slate-800 dark:text-white">
+                <span className="font-bold text-base text-slate-800 dark:text-[#F8FAFC]">
                   {bibleStudies}
                 </span>
                 <button
@@ -251,7 +251,7 @@ export const RegisterView: React.FC = () => {
                     triggerHaptic(5);
                     setBibleStudies((p) => p + 1);
                   }}
-                  className="w-8 h-8 rounded-lg bg-[#01D65A] text-white font-bold flex items-center justify-center shadow-xs active:scale-95"
+                  className="w-8 h-8 rounded-lg bg-[#001E62] hover:bg-[#001545] text-white dark:bg-[#1D4ED8] dark:hover:bg-[#2563EB] font-bold flex items-center justify-center shadow-xs active:scale-95"
                 >
                   +
                 </button>
@@ -259,9 +259,9 @@ export const RegisterView: React.FC = () => {
             </div>
 
             {/* Revisitas Feitas */}
-            <div className="bg-[#F0F2F5] dark:bg-[#111B26] p-2.5 rounded-xl border border-[#E9EDEF] dark:border-[#2A3942]">
-              <div className="flex items-center gap-1.5 text-xs text-[#657484] dark:text-[#8696A0] font-semibold mb-1.5">
-                <RotateCcw className="w-3.5 h-3.5 text-[#008069] dark:text-[#01D65A]" />
+            <div className="bg-[#F0F2F5] dark:bg-[#0B1320] p-2.5 rounded-xl border border-[#E9EDEF] dark:border-[#25364E]">
+              <div className="flex items-center gap-1.5 text-xs text-[#657484] dark:text-[#CBD5E1] font-semibold mb-1.5">
+                <RotateCcw className="w-3.5 h-3.5 text-[#001E62] dark:text-[#60A5FA]" />
                 <span>Revisitas Feitas</span>
               </div>
               <div className="flex items-center justify-between">
@@ -271,11 +271,11 @@ export const RegisterView: React.FC = () => {
                     triggerHaptic(5);
                     setReturnVisitsCount((p) => Math.max(0, p - 1));
                   }}
-                  className="w-8 h-8 rounded-lg bg-white dark:bg-[#1F2C34] text-slate-700 dark:text-slate-200 font-bold flex items-center justify-center shadow-xs border border-[#E9EDEF] dark:border-[#2A3942] active:scale-95"
+                  className="w-8 h-8 rounded-lg bg-white dark:bg-[#111A29] text-slate-700 dark:text-slate-200 font-bold flex items-center justify-center shadow-xs border border-[#E9EDEF] dark:border-[#25364E] active:scale-95"
                 >
                   -
                 </button>
-                <span className="font-bold text-base text-slate-800 dark:text-white">
+                <span className="font-bold text-base text-slate-800 dark:text-[#F8FAFC]">
                   {returnVisitsCount}
                 </span>
                 <button
@@ -284,7 +284,7 @@ export const RegisterView: React.FC = () => {
                     triggerHaptic(5);
                     setReturnVisitsCount((p) => p + 1);
                   }}
-                  className="w-8 h-8 rounded-lg bg-[#01D65A] text-white font-bold flex items-center justify-center shadow-xs active:scale-95"
+                  className="w-8 h-8 rounded-lg bg-[#001E62] hover:bg-[#001545] text-white dark:bg-[#1D4ED8] dark:hover:bg-[#2563EB] font-bold flex items-center justify-center shadow-xs active:scale-95"
                 >
                   +
                 </button>
@@ -295,7 +295,7 @@ export const RegisterView: React.FC = () => {
 
           {/* 📝 Observações do Dia */}
           <div>
-            <label className="block text-xs font-semibold text-[#657484] dark:text-[#8696A0] mb-1">
+            <label className="block text-xs font-semibold text-[#657484] dark:text-[#CBD5E1] mb-1">
               📝 Observações do dia
             </label>
             <textarea
@@ -303,7 +303,7 @@ export const RegisterView: React.FC = () => {
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Saída de campo com o irmão Carlos..."
-              className="w-full bg-[#F0F2F5] dark:bg-[#111B26] text-slate-900 dark:text-[#E9EDEF] px-3 py-2 rounded-xl border border-[#E9EDEF] dark:border-[#2A3942] text-sm focus:outline-none focus:ring-2 focus:ring-[#01D65A] transition-colors resize-none placeholder:text-slate-400 dark:placeholder:text-slate-500"
+              className="w-full bg-[#F0F2F5] dark:bg-[#0B1320] text-slate-900 dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E9EDEF] dark:border-[#25364E] text-sm focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6] transition-colors resize-none placeholder:text-slate-400 dark:placeholder:text-slate-500"
             />
           </div>
 
@@ -312,7 +312,7 @@ export const RegisterView: React.FC = () => {
             <button
               type="button"
               onClick={handleClear}
-              className="flex-1 py-2.5 px-3 rounded-xl border border-[#657484]/30 text-[#657484] dark:text-[#8696A0] text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center gap-1.5 transition-colors active:scale-95"
+              className="flex-1 py-2.5 px-3 rounded-xl border border-[#657484]/30 dark:border-[#25364E] text-[#657484] dark:text-[#CBD5E1] text-xs font-semibold hover:bg-slate-100 dark:hover:bg-[#162236] flex items-center justify-center gap-1.5 transition-colors active:scale-95"
             >
               <Trash2 className="w-3.5 h-3.5" />
               <span>Limpar</span>
@@ -320,7 +320,7 @@ export const RegisterView: React.FC = () => {
 
             <button
               type="submit"
-              className="flex-2 py-2.5 px-4 rounded-xl bg-[#01D65A] hover:bg-[#019444] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all active:scale-95"
+              className="flex-2 py-2.5 px-4 rounded-xl bg-[#001E62] hover:bg-[#001545] text-white dark:bg-[#1D4ED8] dark:hover:bg-[#2563EB] text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all active:scale-95"
             >
               <Save className="w-4 h-4" />
               <span>Salvar Lançamento</span>
@@ -330,7 +330,7 @@ export const RegisterView: React.FC = () => {
       </section>
 
       {/* 👤 SEÇÃO RECOLHÍVEL: NOVA REVISITA */}
-      <section className="bg-white dark:bg-[#1F2C34] rounded-xl p-4 shadow-sm border border-[#E9EDEF] dark:border-[#2A3942]">
+      <section className="bg-white dark:bg-[#111A29] rounded-xl p-4 shadow-sm border border-[#E9EDEF] dark:border-[#1F2E44]">
         <button
           type="button"
           onClick={() => {
@@ -340,28 +340,28 @@ export const RegisterView: React.FC = () => {
           className="w-full flex items-center justify-between text-left focus:outline-none"
         >
           <div className="flex items-center gap-2">
-            <UserPlus className="w-4 h-4 text-[#008069] dark:text-[#01D65A]" />
-            <span className="text-sm font-bold text-[#008069] dark:text-[#01D65A] tracking-wider uppercase">
+            <UserPlus className="w-4 h-4 text-[#001E62] dark:text-[#93C5FD]" />
+            <span className="text-sm font-bold text-[#001E62] dark:text-[#93C5FD] tracking-wider uppercase">
               Nova Revisita / Contato
             </span>
           </div>
-          <div className="flex items-center gap-1 text-[#657484] dark:text-[#8696A0]">
+          <div className="flex items-center gap-1 text-[#657484] dark:text-[#94A3B8]">
             <span className="text-xs font-medium">{isRevisitOpen ? 'Recolher' : 'Expandir'}</span>
             {isRevisitOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </div>
         </button>
 
         {isRevisitOpen && (
-          <form onSubmit={handleSaveRevisit} className="space-y-3.5 pt-4 border-t border-[#E9EDEF] dark:border-[#2A3942] mt-3 animate-fade-in">
+          <form onSubmit={handleSaveRevisit} className="space-y-3.5 pt-4 border-t border-[#E9EDEF] dark:border-[#1F2E44] mt-3 animate-fade-in">
             {visitSaveSuccess && (
-              <div className="flex items-center gap-1.5 text-xs text-[#019444] dark:text-[#01D65A] font-semibold bg-[#01D65A]/10 p-2 rounded-lg">
+              <div className="flex items-center gap-1.5 text-xs text-emerald-700 dark:text-emerald-300 font-semibold bg-emerald-500/10 p-2 rounded-lg">
                 <CheckCircle2 className="w-4 h-4" />
                 <span>Revisita cadastrada com sucesso!</span>
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-semibold text-[#657484] dark:text-[#8696A0] mb-1">
+              <label className="block text-xs font-semibold text-[#657484] dark:text-[#CBD5E1] mb-1">
                 Nome do Morador *
               </label>
               <input
@@ -370,12 +370,12 @@ export const RegisterView: React.FC = () => {
                 value={revisitName}
                 onChange={(e) => setRevisitName(e.target.value)}
                 placeholder="Ex: Dona Maria"
-                className="w-full bg-[#F0F2F5] dark:bg-[#111B26] text-slate-900 dark:text-[#E9EDEF] px-3 py-2 rounded-xl border border-[#E9EDEF] dark:border-[#2A3942] text-sm focus:outline-none focus:ring-2 focus:ring-[#01D65A]"
+                className="w-full bg-[#F0F2F5] dark:bg-[#0B1320] text-slate-900 dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E9EDEF] dark:border-[#25364E] text-sm focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6]"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#657484] dark:text-[#8696A0] mb-1">
+              <label className="block text-xs font-semibold text-[#657484] dark:text-[#CBD5E1] mb-1">
                 Endereço
               </label>
               <div className="flex gap-1.5">
@@ -384,14 +384,14 @@ export const RegisterView: React.FC = () => {
                   value={revisitAddress}
                   onChange={(e) => setRevisitAddress(e.target.value)}
                   placeholder="Rua das Flores, 123"
-                  className="flex-1 bg-[#F0F2F5] dark:bg-[#111B26] text-slate-900 dark:text-[#E9EDEF] px-3 py-2 rounded-xl border border-[#E9EDEF] dark:border-[#2A3942] text-sm focus:outline-none focus:ring-2 focus:ring-[#01D65A]"
+                  className="flex-1 bg-[#F0F2F5] dark:bg-[#0B1320] text-slate-900 dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E9EDEF] dark:border-[#25364E] text-sm focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6]"
                 />
                 {revisitAddress.trim() && (
                   <button
                     type="button"
                     onClick={() => handleOpenMaps(revisitAddress)}
                     title="Ver no Google Maps"
-                    className="p-2.5 rounded-xl bg-[#E1FFD2] dark:bg-[#005C4B]/60 text-[#008069] dark:text-[#01D65A] hover:bg-[#01D65A] hover:text-white transition-colors border border-[#01D65A]/20"
+                    className="p-2.5 rounded-xl bg-[#E8EEF8] dark:bg-[#172554] text-[#001E62] dark:text-[#93C5FD] hover:bg-[#001E62] hover:text-white dark:hover:bg-[#1D4ED8] transition-colors border border-[#001E62]/20 dark:border-[#3B82F6]/30"
                   >
                     <MapPin className="w-4 h-4" />
                   </button>
@@ -401,7 +401,7 @@ export const RegisterView: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-xs font-semibold text-[#657484] dark:text-[#8696A0] mb-1">
+                <label className="block text-xs font-semibold text-[#657484] dark:text-[#CBD5E1] mb-1">
                   Assunto Tratado
                 </label>
                 <input
@@ -409,25 +409,25 @@ export const RegisterView: React.FC = () => {
                   value={revisitTopic}
                   onChange={(e) => setRevisitTopic(e.target.value)}
                   placeholder="Sobre o Reino..."
-                  className="w-full bg-[#F0F2F5] dark:bg-[#111B26] text-slate-900 dark:text-[#E9EDEF] px-3 py-2 rounded-xl border border-[#E9EDEF] dark:border-[#2A3942] text-sm focus:outline-none focus:ring-2 focus:ring-[#01D65A]"
+                  className="w-full bg-[#F0F2F5] dark:bg-[#0B1320] text-slate-900 dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E9EDEF] dark:border-[#25364E] text-sm focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#657484] dark:text-[#8696A0] mb-1">
+                <label className="block text-xs font-semibold text-[#657484] dark:text-[#CBD5E1] mb-1">
                   Data da Visita
                 </label>
                 <input
                   type="date"
                   value={revisitLastDate}
                   onChange={(e) => setRevisitLastDate(e.target.value)}
-                  className="w-full bg-[#F0F2F5] dark:bg-[#111B26] text-slate-900 dark:text-[#E9EDEF] px-3 py-2 rounded-xl border border-[#E9EDEF] dark:border-[#2A3942] text-sm focus:outline-none focus:ring-2 focus:ring-[#01D65A]"
+                  className="w-full bg-[#F0F2F5] dark:bg-[#0B1320] text-slate-900 dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E9EDEF] dark:border-[#25364E] text-sm focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6]"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#657484] dark:text-[#8696A0] mb-1">
+              <label className="block text-xs font-semibold text-[#657484] dark:text-[#CBD5E1] mb-1">
                 Publicação Deixada
               </label>
               <input
@@ -435,12 +435,12 @@ export const RegisterView: React.FC = () => {
                 value={revisitPublication}
                 onChange={(e) => setRevisitPublication(e.target.value)}
                 placeholder="Ex: Livro Seja Feliz para Sempre"
-                className="w-full bg-[#F0F2F5] dark:bg-[#111B26] text-slate-900 dark:text-[#E9EDEF] px-3 py-2 rounded-xl border border-[#E9EDEF] dark:border-[#2A3942] text-sm focus:outline-none focus:ring-2 focus:ring-[#01D65A]"
+                className="w-full bg-[#F0F2F5] dark:bg-[#0B1320] text-slate-900 dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E9EDEF] dark:border-[#25364E] text-sm focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6]"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#657484] dark:text-[#8696A0] mb-1">
+              <label className="block text-xs font-semibold text-[#657484] dark:text-[#CBD5E1] mb-1">
                 Anotações
               </label>
               <textarea
@@ -448,13 +448,13 @@ export const RegisterView: React.FC = () => {
                 value={revisitNotes}
                 onChange={(e) => setRevisitNotes(e.target.value)}
                 placeholder="Disponível às terças pela manhã..."
-                className="w-full bg-[#F0F2F5] dark:bg-[#111B26] text-slate-900 dark:text-[#E9EDEF] px-3 py-2 rounded-xl border border-[#E9EDEF] dark:border-[#2A3942] text-sm focus:outline-none focus:ring-2 focus:ring-[#01D65A] resize-none"
+                className="w-full bg-[#F0F2F5] dark:bg-[#0B1320] text-slate-900 dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E9EDEF] dark:border-[#25364E] text-sm focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6] resize-none"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full py-2.5 rounded-xl bg-[#01D65A] hover:bg-[#019444] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all active:scale-95"
+              className="w-full py-2.5 rounded-xl bg-[#001E62] hover:bg-[#001545] text-white dark:bg-[#1D4ED8] dark:hover:bg-[#2563EB] text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all active:scale-95"
             >
               <Save className="w-4 h-4" />
               <span>Salvar Revisita</span>

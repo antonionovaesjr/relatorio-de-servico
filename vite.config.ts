@@ -5,6 +5,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: '/relatorio-servicos/',
   plugins: [
     react(),
     tailwindcss(),
@@ -18,31 +19,32 @@ export default defineConfig({
         'icon-maskable.png',
       ],
       manifest: {
-        name: 'Relatório de Ministério Pessoal',
+        name: 'Relatório de Serviço PWA',
         short_name: 'Relatório',
         description: 'Controle pessoal e offline do ministério de campo das Testemunhas de Jeová.',
-        theme_color: '#01D65A',
-        background_color: '#111B26',
+        theme_color: '#001E62',
+        background_color: '#0A111E',
         display: 'standalone',
         orientation: 'portrait',
-        start_url: '/',
-        scope: '/',
+        start_url: '/relatorio-servicos/',
+        scope: '/relatorio-servicos/',
+        lang: 'pt-BR',
         categories: ['productivity', 'utilities'],
         icons: [
           {
-            src: '/icon-192.png',
+            src: 'icon-192.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'any',
           },
           {
-            src: '/icon-512.png',
+            src: 'icon-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any',
           },
           {
-            src: '/icon-maskable.png',
+            src: 'icon-maskable.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',

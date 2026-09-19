@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
-  Share2,
+  ClipboardCopy,
   Trash2,
   ChevronLeft,
   ChevronRight,
@@ -25,6 +25,7 @@ import {
   parseHHMMToMinutes,
 } from '../../utils/date';
 import { triggerHaptic } from '../../utils/haptics';
+import { useTranslation } from '../../i18n/I18nContext';
 import { ShareModal } from './components/ShareModal';
 import { RevisitModal } from '../register/RevisitModal';
 
@@ -33,6 +34,7 @@ interface ReportViewProps {
 }
 
 export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
+  const { t, locale } = useTranslation();
   const [currentMonthKey, setCurrentMonthKey] = useState<string>(
     () => initialMonthKey || getMonthKey(new Date())
   );
@@ -50,6 +52,19 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
   const [editTimeStr, setEditTimeStr] = useState('');
   const [editStudies, setEditStudies] = useState(0);
   const [editNotes, setEditNotes] = useState('');
+
+  // Ajuste rápido de tempo na edição
+  const handleAdjustEditMinutes = (mins: number) => {
+    triggerHaptic(8);
+    const currentMins = parseHHMMToMinutes(editTimeStr);
+    const nextMins = Math.max(0, currentMins + mins);
+    setEditTimeStr(formatMinutesToHHMM(nextMins));
+  };
+
+  const handleResetEditTime = () => {
+    triggerHaptic(10);
+    setEditTimeStr('00:00');
+  };
 
   // Configurações do usuário
   const settings = useUserSettings();
@@ -153,7 +168,7 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
   const handleDeleteDaily = async (id?: number) => {
     if (!id) return;
     triggerHaptic(15);
-    if (window.confirm('Deseja excluir este lançamento diário?')) {
+    if (window.confirm(t('reports.deleteConfirmDaily'))) {
       await db.dailyEntries.delete(id);
     }
   };
@@ -217,51 +232,50 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
   const handleDeleteVisit = async (id?: number) => {
     if (!id) return;
     triggerHaptic(12);
-    if (window.confirm('Excluir esta revisita?')) {
+    if (window.confirm(t('reports.deleteConfirmRevisit'))) {
       await db.returnVisits.delete(id);
     }
   };
 
   return (
     <div className="space-y-3.5 pb-6 select-none animate-fade-in">
-      {/* 🔍 BARRA DE BUSCA ESTILO WHATSAPP */}
+      {/* 🔍 BARRA DE BUSCA */}
       <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#657484] dark:text-[#8696A0]">
+        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#5C6B7E] dark:text-[#94A3B8]">
           <Search className="w-4 h-4" />
         </div>
         <input
           type="search"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Buscar relatório ou revisita..."
-          className="w-full bg-white dark:bg-[#1F2C34] text-[#111B1F] dark:text-[#E9EDEF] pl-10 pr-3.5 py-2.5 rounded-xl border border-[#E1E1E1] dark:border-[#2A3942] text-xs focus:outline-none focus:ring-2 focus:ring-[#01D65A] shadow-xs placeholder:text-[#657484] dark:placeholder:text-[#8696A0]"
+          placeholder={t('reports.searchPlaceholder')}
+          className="w-full bg-white dark:bg-[#0B1320] text-[#111B1F] dark:text-[#F8FAFC] pl-10 pr-3.5 py-2.5 rounded-xl border border-[#E1E1E1] dark:border-[#25364E] text-xs focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:border-[#60A5FA] shadow-xs placeholder:text-[#657484] dark:placeholder:text-[#94A3B8]"
         />
         {searchQuery && (
           <button
             onClick={() => setSearchQuery('')}
-            className="absolute inset-y-0 right-0 pr-3 flex items-center text-xs text-[#657484] dark:text-[#8696A0] hover:text-[#111B1F] dark:hover:text-white"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-xs text-[#657484] dark:text-[#94A3B8] hover:text-[#111B1F] dark:hover:text-white"
           >
-            Limpar
+            {t('common.clear')}
           </button>
         )}
       </div>
 
       {/* 📅 CARD SELETOR DE MÊS & OPÇÕES TEOCRÁTICAS */}
-      <section className="bg-white dark:bg-[#1F2C34] rounded-xl p-4 border border-[#E1E1E1] dark:border-[#2A3942] shadow-sm space-y-3">
-        <div className="flex items-center justify-between pb-2 border-b border-[#E1E1E1] dark:border-[#2A3942]">
+      <section className="bg-white dark:bg-[#111A29] rounded-xl p-4 border border-[#E1E1E1] dark:border-[#1F2E44] shadow-sm space-y-3">
+        <div className="flex items-center justify-between pb-2 border-b border-[#E1E1E1] dark:border-[#1F2E44]">
           <button
             type="button"
             onClick={() => handleNavigate(-1)}
-            className="p-1.5 rounded-lg text-[#657484] hover:text-[#111B1F] dark:text-[#8696A0] dark:hover:text-white hover:bg-[#F0F2F5] dark:hover:bg-[#111B26] transition-colors"
-            title="Mês anterior"
+            className="p-1.5 rounded-lg text-[#5C6B7E] hover:text-[#111B1F] dark:text-[#CBD5E1] dark:hover:text-white hover:bg-[#F0F2F5] dark:hover:bg-[#162236] transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
 
-          <label className="text-sm font-extrabold capitalize text-[#111B1F] dark:text-[#E9EDEF] cursor-pointer flex items-center gap-1.5">
-            <span>📅 {formatMonthLabel(currentMonthKey)}</span>
-            <span className="text-xs font-normal text-[#657484] dark:text-[#8696A0]">
-              — {filteredDailyEntries.length} {filteredDailyEntries.length === 1 ? 'registro' : 'registros'}
+          <label className="text-sm font-extrabold capitalize text-[#111B1F] dark:text-[#F8FAFC] cursor-pointer flex items-center gap-1.5">
+            <span>📅 {formatMonthLabel(currentMonthKey, locale)}</span>
+            <span className="text-xs font-normal text-[#5C6B7E] dark:text-[#94A3B8]">
+              — {filteredDailyEntries.length} {filteredDailyEntries.length === 1 ? t('reports.singleRecord') : t('reports.multipleRecords')}
             </span>
             <input
               type="month"
@@ -274,8 +288,7 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
           <button
             type="button"
             onClick={() => handleNavigate(1)}
-            className="p-1.5 rounded-lg text-[#657484] hover:text-[#111B1F] dark:text-[#8696A0] dark:hover:text-white hover:bg-[#F0F2F5] dark:hover:bg-[#111B26] transition-colors"
-            title="Próximo mês"
+            className="p-1.5 rounded-lg text-[#5C6B7E] hover:text-[#111B1F] dark:text-[#CBD5E1] dark:hover:text-white hover:bg-[#F0F2F5] dark:hover:bg-[#162236] transition-colors"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -283,9 +296,13 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
 
         {/* Opções Teocráticas — SOMENTE SE FOR PUBLICADOR NAS CONFIGURAÇÕES */}
         {isPublisher && (
-          <div className="space-y-2 pt-1 border-t border-[#E1E1E1]/60 dark:border-[#2A3942]/60 mt-2">
+          <div className="space-y-2 pt-1 border-t border-[#E1E1E1]/60 dark:border-[#1F2E44] mt-2">
             {/* Campo: Mês como pioneiro auxiliar */}
-            <label className="flex items-center gap-2.5 p-2 rounded-xl bg-[#F0F2F5] dark:bg-[#111B26] border border-[#E1E1E1] dark:border-[#2A3942] cursor-pointer hover:border-[#01D65A] transition-colors select-none">
+            <label className={`flex items-center gap-2.5 p-2 rounded-xl border cursor-pointer select-none transition-colors ${
+              report.isAuxiliaryPioneer
+                ? 'bg-[#E8EEF8] dark:bg-[#172554] border-[#001E62] dark:border-[#3B82F6]'
+                : 'bg-[#F0F2F5] dark:bg-[#0B1320] border-[#E1E1E1] dark:border-[#202E42] hover:border-[#001E62]'
+            }`}>
               <input
                 type="checkbox"
                 checked={report.isAuxiliaryPioneer}
@@ -297,19 +314,21 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
                     hasReducedRequirement: checked ? report.hasReducedRequirement : false,
                   });
                 }}
-                className="w-4 h-4 rounded text-[#01D65A] focus:ring-[#01D65A] border-[#657484]/40 accent-[#01D65A]"
+                className="w-4 h-4 rounded text-[#001E62] dark:text-[#2563EB] focus:ring-[#001E62] border-[#657484]/40 accent-[#001E62] dark:accent-[#2563EB]"
               />
-              <span className="text-xs font-semibold text-[#111B1F] dark:text-[#E9EDEF]">
-                Mês como pioneiro auxiliar
+              <span className="text-xs font-semibold text-[#111B1F] dark:text-[#F8FAFC]">
+                {t('reports.auxPioneerMonth')}
               </span>
             </label>
 
             {/* Campo: 50% (mês especial) */}
             <label
-              className={`flex items-center gap-2.5 p-2 rounded-xl border border-[#E1E1E1] dark:border-[#2A3942] transition-colors select-none ${
+              className={`flex items-center gap-2.5 p-2 rounded-xl border transition-colors select-none ${
                 report.isAuxiliaryPioneer
-                  ? 'bg-[#F0F2F5] dark:bg-[#111B26] cursor-pointer hover:border-[#01D65A]'
-                  : 'bg-[#F0F2F5]/50 dark:bg-[#111B26]/50 opacity-60 cursor-pointer'
+                  ? report.hasReducedRequirement
+                    ? 'bg-[#E8EEF8] dark:bg-[#172554] border-[#001E62] dark:border-[#3B82F6] cursor-pointer'
+                    : 'bg-[#F0F2F5] dark:bg-[#0B1320] border-[#E1E1E1] dark:border-[#202E42] cursor-pointer'
+                  : 'bg-[#F0F2F5]/50 dark:bg-[#0B1320]/60 border-[#E1E1E1] dark:border-[#202E42] opacity-60 cursor-pointer'
               }`}
             >
               <input
@@ -323,15 +342,15 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
                     hasReducedRequirement: checked,
                   });
                 }}
-                className="w-4 h-4 rounded text-[#01D65A] focus:ring-[#01D65A] border-[#657484]/40 accent-[#01D65A]"
+                className="w-4 h-4 rounded text-[#001E62] dark:text-[#2563EB] focus:ring-[#001E62] border-[#657484]/40 accent-[#001E62] dark:accent-[#2563EB]"
               />
               <div className="flex items-center gap-1.5">
-                <span className="text-xs font-semibold text-[#111B1F] dark:text-[#E9EDEF]">
-                  50% (mês especial)
+                <span className="text-xs font-semibold text-[#111B1F] dark:text-[#F8FAFC]">
+                  {t('reports.special50')}
                 </span>
                 {!report.isAuxiliaryPioneer && (
-                  <span className="text-[10px] text-[#657484] dark:text-[#8696A0]">
-                    (ativa pioneiro aux.)
+                  <span className="text-[10px] text-[#5C6B7E] dark:text-[#94A3B8]">
+                    {t('reports.activatesAux')}
                   </span>
                 )}
               </div>
@@ -340,23 +359,23 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
         )}
       </section>
 
-      {/* 📄 REGISTROS DO MÊS (Estilo chat WhatsApp) */}
-      <section className="bg-white dark:bg-[#1F2C34] rounded-xl p-4 border border-[#E1E1E1] dark:border-[#2A3942] shadow-sm space-y-3">
-        <div className="flex items-center justify-between pb-2 border-b border-[#E1E1E1] dark:border-[#2A3942]">
+      {/* 📄 REGISTROS DO MÊS */}
+      <section className="bg-white dark:bg-[#111A29] rounded-xl p-4 border border-[#E1E1E1] dark:border-[#1F2E44] shadow-sm space-y-3">
+        <div className="flex items-center justify-between pb-2 border-b border-[#E1E1E1] dark:border-[#1F2E44]">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#01D65A]" />
-            <h2 className="text-xs font-bold text-[#008069] dark:text-[#01D65A] tracking-wider uppercase">
-              📄 Registros do Mês ({filteredDailyEntries.length})
+            <span className="w-2.5 h-2.5 rounded-full bg-[#001E62] dark:bg-[#60A5FA]" />
+            <h2 className="text-xs font-bold text-[#001E62] dark:text-[#93C5FD] tracking-wider uppercase">
+              📄 {t('reports.monthEntries', { count: filteredDailyEntries.length })}
             </h2>
           </div>
         </div>
 
         {filteredDailyEntries.length === 0 ? (
-          <div className="py-6 text-center text-xs text-[#657484] dark:text-[#8696A0]">
-            Nenhum registro encontrado para este período.
+          <div className="py-6 text-center text-xs text-[#5C6B7E] dark:text-[#94A3B8]">
+            {t('reports.noEntries')}
           </div>
         ) : (
-          <div className="divide-y divide-[#E1E1E1] dark:divide-[#2A3942]">
+          <div className="divide-y divide-[#E1E1E1] dark:divide-[#1F2E44]">
             {filteredDailyEntries.map((entry) => {
               const entryMinutes = entry.hours * 60 + (entry.minutes || 0);
               const dayStr = entry.date.slice(8, 10);
@@ -366,13 +385,13 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
                 <div key={entry.id} className="py-2.5 first:pt-0 last:pb-0 space-y-1">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <span className="text-xs font-bold text-[#111B1F] dark:text-[#E9EDEF]">
+                      <span className="text-xs font-bold text-[#111B1F] dark:text-[#F8FAFC]">
                         📅 {dayStr}/{monthStr}
                       </span>
-                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      <span className="text-xs font-semibold text-slate-700 dark:text-[#CBD5E1]">
                         📚 {entry.bibleStudies || 0}
                       </span>
-                      <span className="text-xs font-mono font-bold text-[#008069] dark:text-[#01D65A]">
+                      <span className="text-xs font-mono font-bold text-[#001E62] dark:text-[#60A5FA]">
                         ⏰ {entryMinutes > 0 ? formatMinutesToHHMM(entryMinutes) : '—'}
                       </span>
                     </div>
@@ -382,8 +401,8 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
                       <button
                         type="button"
                         onClick={() => handleStartEditDaily(entry)}
-                        title="Editar"
-                        className="p-1 rounded-md text-[#657484] hover:text-[#111B1F] dark:text-[#8696A0] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+                        title={t('common.edit')}
+                        className="p-1 rounded-md text-[#5C6B7E] hover:text-[#001E62] dark:text-[#CBD5E1] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#162236] transition-colors"
                       >
                         <Pencil className="w-3.5 h-3.5" />
                       </button>
@@ -392,8 +411,8 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
                       <button
                         type="button"
                         onClick={() => handleDeleteDaily(entry.id)}
-                        title="Excluir"
-                        className="p-1 rounded-md text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40"
+                        title={t('common.delete')}
+                        className="p-1 rounded-md text-rose-500 hover:text-rose-700 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -401,7 +420,7 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
                   </div>
 
                   {entry.notes && (
-                    <p className="text-xs text-[#657484] dark:text-[#8696A0] italic bg-[#F0F2F5]/70 dark:bg-[#111B26]/70 px-2.5 py-1 rounded-lg">
+                    <p className="text-xs text-[#5C6B7E] dark:text-[#CBD5E1] italic bg-[#F0F2F5]/70 dark:bg-[#0B1320] border border-[#E1E1E1]/50 dark:border-[#202E42] px-2.5 py-1.5 rounded-lg">
                       "{entry.notes}"
                     </p>
                   )}
@@ -413,12 +432,12 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
       </section>
 
       {/* 📌 REVISITAS DESTE MÊS */}
-      <section className="bg-white dark:bg-[#1F2C34] rounded-xl p-4 border border-[#E1E1E1] dark:border-[#2A3942] shadow-sm space-y-3">
-        <div className="flex items-center justify-between pb-2 border-b border-[#E1E1E1] dark:border-[#2A3942]">
+      <section className="bg-white dark:bg-[#111A29] rounded-xl p-4 border border-[#E1E1E1] dark:border-[#1F2E44] shadow-sm space-y-3">
+        <div className="flex items-center justify-between pb-2 border-b border-[#E1E1E1] dark:border-[#1F2E44]">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#01D65A]" />
-            <h2 className="text-xs font-bold text-[#008069] dark:text-[#01D65A] tracking-wider uppercase">
-              📌 Revisitas deste Mês ({filteredReturnVisits.length})
+            <span className="w-2.5 h-2.5 rounded-full bg-[#001E62] dark:bg-[#60A5FA]" />
+            <h2 className="text-xs font-bold text-[#001E62] dark:text-[#93C5FD] tracking-wider uppercase">
+              📌 {t('reports.revisitsThisMonth', { count: filteredReturnVisits.length })}
             </h2>
           </div>
           <button
@@ -427,56 +446,56 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
               triggerHaptic(10);
               setIsNewRevisitModalOpen(true);
             }}
-            className="text-xs font-bold text-[#019444] dark:text-[#01D65A] flex items-center gap-1 hover:underline"
+            className="text-xs font-bold text-[#001E62] dark:text-[#93C5FD] hover:dark:text-white flex items-center gap-1 hover:underline"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>Adicionar</span>
+            <span>{t('common.add')}</span>
           </button>
         </div>
 
         {filteredReturnVisits.length === 0 ? (
-          <div className="py-4 text-center text-xs text-[#657484] dark:text-[#8696A0]">
-            Nenhuma revisita registrada neste mês.
+          <div className="py-4 text-center text-xs text-[#5C6B7E] dark:text-[#94A3B8]">
+            {t('reports.noRevisitsMonth')}
           </div>
         ) : (
           <div className="space-y-2">
             {filteredReturnVisits.map((visit) => (
               <div
                 key={visit.id}
-                className="p-3 rounded-xl bg-[#F0F2F5] dark:bg-[#111B26] border border-[#E1E1E1] dark:border-[#2A3942] space-y-1.5"
+                className="p-3 rounded-xl bg-[#F0F2F5] dark:bg-[#0B1320] border border-[#E1E1E1] dark:border-[#202E42] space-y-1.5"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-start gap-2">
                     <button
                       type="button"
                       onClick={() => handleToggleVisit(visit)}
-                      className="mt-0.5 text-[#01D65A]"
+                      className="mt-0.5 text-[#001E62] dark:text-[#60A5FA]"
                     >
                       {visit.isCompleted ? (
-                        <CheckCircle2 className="w-4 h-4 text-[#01D65A]" />
+                        <CheckCircle2 className="w-4 h-4 text-[#001E62] dark:text-[#60A5FA]" />
                       ) : (
-                        <Circle className="w-4 h-4 text-[#657484] dark:text-[#8696A0]" />
+                        <Circle className="w-4 h-4 text-[#5C6B7E] dark:text-[#94A3B8]" />
                       )}
                     </button>
                     <div>
                       <h4
                         className={`text-xs font-bold ${
                           visit.isCompleted
-                            ? 'line-through text-[#657484] dark:text-[#8696A0]'
-                            : 'text-[#111B1F] dark:text-[#E9EDEF]'
+                            ? 'line-through text-[#5C6B7E] dark:text-[#94A3B8]'
+                            : 'text-[#111B1F] dark:text-[#F8FAFC]'
                         }`}
                       >
                         • {visit.contactName}
                       </h4>
 
                       {visit.address && (
-                        <p className="text-[11px] text-[#657484] dark:text-[#8696A0] mt-0.5">
+                        <p className="text-[11px] text-[#5C6B7E] dark:text-[#94A3B8] mt-0.5">
                           📍 {visit.address}
                         </p>
                       )}
 
                       {visit.notes && (
-                        <p className="text-[11px] text-[#657484] dark:text-[#8696A0] italic mt-0.5">
+                        <p className="text-[11px] text-[#5C6B7E] dark:text-[#CBD5E1] italic mt-0.5">
                           "{visit.notes}"
                         </p>
                       )}
@@ -488,8 +507,8 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
                       <button
                         type="button"
                         onClick={() => handleOpenMaps(visit.address)}
-                        title="Abrir no Google Maps"
-                        className="p-1.5 rounded-lg bg-[#E1FFD2] dark:bg-[#005C4B]/60 text-[#008069] dark:text-[#01D65A] hover:bg-[#01D65A] hover:text-white transition-colors border border-[#01D65A]/20"
+                        title={t('home.openMaps')}
+                        className="p-1.5 rounded-lg bg-[#E8EEF8] dark:bg-[#172554] text-[#001E62] dark:text-[#93C5FD] hover:bg-[#001E62] hover:text-white dark:hover:bg-[#1E3A8A] transition-colors border border-[#001E62]/20 dark:border-[#3B82F6]/40"
                       >
                         <span className="text-sm">🗺️</span>
                       </button>
@@ -497,8 +516,8 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
                     <button
                       type="button"
                       onClick={() => handleDeleteVisit(visit.id)}
-                      title="Excluir"
-                      className="p-1.5 rounded-lg text-red-500 hover:text-red-700 hover:bg-white dark:hover:bg-[#1F2C34]"
+                      title={t('common.delete')}
+                      className="p-1.5 rounded-lg text-rose-500 hover:text-rose-700 dark:text-rose-400 hover:bg-white dark:hover:bg-[#162236] transition-colors"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -510,20 +529,20 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
         )}
       </section>
 
-      {/* 📤 BOTÃO PRINCIPAL: COMPARTILHAR MÊS INTEIRO */}
+      {/* 📋 BOTÃO PRINCIPAL: COPIAR RELATÓRIO DO MÊS */}
       <button
         type="button"
         onClick={() => {
           triggerHaptic(15);
           setIsShareModalOpen(true);
         }}
-        className="w-full py-3.5 px-4 rounded-xl bg-[#01D65A] hover:bg-[#019444] text-white text-sm font-bold flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
+        className="w-full py-3.5 px-4 rounded-xl bg-[#001E62] hover:bg-[#001545] dark:bg-[#1D4ED8] hover:dark:bg-[#2563EB] text-white text-sm font-bold flex items-center justify-center gap-2 shadow-md dark:shadow-blue-950/40 dark:border dark:border-[#60A5FA]/40 transition-all active:scale-95"
       >
-        <Share2 className="w-5 h-5" />
-        <span>Compartilhar mês inteiro</span>
+        <ClipboardCopy className="w-5 h-5" />
+        <span>📋 {t('reports.copyMonthReport')}</span>
       </button>
 
-      {/* Modal de Compartilhamento do Mês Inteiro */}
+      {/* Modal de Copiar Relatório do Mês Inteiro */}
       <ShareModal
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
@@ -545,64 +564,126 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
         onClose={() => setIsNewRevisitModalOpen(false)}
       />
 
-      {/* Modal de Edição de Lançamento Diário */}
+      {/* Modal de Edição / Correção de Lançamento Diário */}
       {editingDailyEntry && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/60 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white dark:bg-[#1F2C34] rounded-2xl w-full max-w-md border border-[#E1E1E1] dark:border-[#2A3942] p-4 shadow-2xl space-y-3">
-            <h3 className="text-sm font-bold text-[#008069] dark:text-[#01D65A] border-b border-[#E1E1E1] dark:border-[#2A3942] pb-2">
-              Editar Registro Diário
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/70 backdrop-blur-xs animate-fade-in">
+          <div className="bg-white dark:bg-[#111A29] rounded-2xl w-full max-w-md border border-[#E1E1E1] dark:border-[#1F2E44] p-4 shadow-2xl space-y-3.5 max-h-[92vh] overflow-y-auto">
+            <h3 className="text-sm font-bold text-[#001E62] dark:text-[#93C5FD] border-b border-[#E1E1E1] dark:border-[#1F2E44] pb-2 flex items-center justify-between">
+              <span>{t('reports.editDailyTitle')}</span>
+              <span className="text-[11px] font-normal text-[#5C6B7E] dark:text-[#94A3B8]">
+                ID: #{editingDailyEntry.id}
+              </span>
             </h3>
 
             <form onSubmit={handleSaveEditDaily} className="space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-[#657484] dark:text-[#8696A0] mb-1">
-                  Data
+                <label className="block text-xs font-semibold text-[#5C6B7E] dark:text-[#CBD5E1] mb-1">
+                  {t('reports.dateLabel')}
                 </label>
                 <input
                   type="date"
                   required
                   value={editDate}
                   onChange={(e) => setEditDate(e.target.value)}
-                  className="w-full bg-[#F0F2F5] dark:bg-[#111B26] text-[#111B1F] dark:text-[#E9EDEF] px-3 py-2 rounded-xl border border-[#E1E1E1] dark:border-[#2A3942] text-xs"
+                  className="w-full bg-[#F0F2F5] dark:bg-[#0B1320] text-[#111B1F] dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E1E1E1] dark:border-[#25364E] text-xs focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:border-[#60A5FA]"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-[#657484] dark:text-[#8696A0] mb-1">
-                  Horas (hh:mm)
-                </label>
+              {/* Seletor e Correção de Horas */}
+              <div className="space-y-2 bg-[#F0F2F5] dark:bg-[#0B1320] p-3 rounded-xl border border-[#E1E1E1] dark:border-[#202E42]">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-[#111B1F] dark:text-[#CBD5E1]">
+                    ⏰ {t('reports.timeHours')}
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleResetEditTime}
+                    className="text-[10px] font-bold text-rose-600 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-900"
+                  >
+                    ↺ {t('common.reset')}
+                  </button>
+                </div>
+
                 <input
                   type="text"
                   required
                   value={editTimeStr}
                   onChange={(e) => setEditTimeStr(e.target.value)}
                   placeholder="00:00"
-                  className="w-full bg-[#F0F2F5] dark:bg-[#111B26] font-mono text-center text-lg font-bold text-[#008069] dark:text-[#01D65A] px-3 py-2 rounded-xl border border-[#E1E1E1] dark:border-[#2A3942]"
+                  className="w-full bg-white dark:bg-[#111A29] font-mono text-center text-xl font-bold text-[#001E62] dark:text-[#60A5FA] px-3 py-2 rounded-xl border border-[#001E62]/30 dark:border-[#3B82F6]/50 focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:border-[#60A5FA]"
                 />
+
+                {/* Correção de Lançamento: Reduzir / Diminuir tempo */}
+                <div>
+                  <div className="text-[10px] uppercase font-bold tracking-wider text-rose-700 dark:text-rose-400 mb-1">
+                    {t('reports.correctDecrease')}
+                  </div>
+                  <div className="grid grid-cols-4 gap-1">
+                    {[
+                      { label: '-1h', val: -60 },
+                      { label: '-30m', val: -30 },
+                      { label: '-15m', val: -15 },
+                      { label: '-5m', val: -5 },
+                    ].map((btn) => (
+                      <button
+                        key={btn.label}
+                        type="button"
+                        onClick={() => handleAdjustEditMinutes(btn.val)}
+                        className="py-1 text-[11px] font-bold rounded-lg bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200 dark:border-rose-900 active:scale-95 text-center transition-colors"
+                      >
+                        {btn.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Adicionar tempo */}
+                <div>
+                  <div className="text-[10px] uppercase font-bold tracking-wider text-[#001E62] dark:text-[#93C5FD] mb-1">
+                    {t('reports.addTime')}
+                  </div>
+                  <div className="grid grid-cols-4 gap-1">
+                    {[
+                      { label: '+5m', val: 5 },
+                      { label: '+15m', val: 15 },
+                      { label: '+30m', val: 30 },
+                      { label: '+1h', val: 60 },
+                    ].map((btn) => (
+                      <button
+                        key={btn.label}
+                        type="button"
+                        onClick={() => handleAdjustEditMinutes(btn.val)}
+                        className="py-1 text-[11px] font-bold rounded-lg bg-[#E8EEF8] dark:bg-[#172554] text-[#001E62] dark:text-[#93C5FD] hover:bg-[#001E62] hover:text-white dark:hover:bg-[#1E3A8A] transition-colors border border-[#001E62]/20 dark:border-[#3B82F6]/40 active:scale-95 text-center"
+                      >
+                        {btn.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#657484] dark:text-[#8696A0] mb-1">
-                  Estudos Bíblicos
+                <label className="block text-xs font-semibold text-[#5C6B7E] dark:text-[#CBD5E1] mb-1">
+                  {t('dailyEntry.bibleStudies')}
                 </label>
                 <input
                   type="number"
                   min="0"
                   value={editStudies}
                   onChange={(e) => setEditStudies(parseInt(e.target.value, 10) || 0)}
-                  className="w-full bg-[#F0F2F5] dark:bg-[#111B26] text-[#111B1F] dark:text-[#E9EDEF] px-3 py-2 rounded-xl border border-[#E1E1E1] dark:border-[#2A3942] text-xs"
+                  className="w-full bg-[#F0F2F5] dark:bg-[#0B1320] text-[#111B1F] dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E1E1E1] dark:border-[#25364E] text-xs focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:border-[#60A5FA]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#657484] dark:text-[#8696A0] mb-1">
-                  Observações
+                <label className="block text-xs font-semibold text-[#5C6B7E] dark:text-[#CBD5E1] mb-1">
+                  {t('reports.notesLabel')}
                 </label>
                 <textarea
                   rows={2}
                   value={editNotes}
                   onChange={(e) => setEditNotes(e.target.value)}
-                  className="w-full bg-[#F0F2F5] dark:bg-[#111B26] text-[#111B1F] dark:text-[#E9EDEF] px-3 py-2 rounded-xl border border-[#E1E1E1] dark:border-[#2A3942] text-xs resize-none"
+                  className="w-full bg-[#F0F2F5] dark:bg-[#0B1320] text-[#111B1F] dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E1E1E1] dark:border-[#25364E] text-xs resize-none focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:border-[#60A5FA]"
                 />
               </div>
 
@@ -610,15 +691,15 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
                 <button
                   type="button"
                   onClick={() => setEditingDailyEntry(null)}
-                  className="flex-1 py-2 px-3 rounded-xl border border-[#657484]/30 text-xs font-semibold text-[#657484] dark:text-[#8696A0]"
+                  className="flex-1 py-2.5 px-3 rounded-xl border border-[#657484]/30 dark:border-[#25364E] text-xs font-semibold text-[#5C6B7E] dark:text-[#CBD5E1] hover:bg-slate-100 dark:hover:bg-[#162236] transition-colors"
                 >
-                  Cancelar
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2 px-3 rounded-xl bg-[#01D65A] hover:bg-[#019444] text-white text-xs font-bold"
+                  className="flex-1 py-2.5 px-3 rounded-xl bg-[#001E62] hover:bg-[#001545] dark:bg-[#1D4ED8] hover:dark:bg-[#2563EB] text-white text-xs font-bold transition-colors active:scale-95 dark:border dark:border-[#60A5FA]/40"
                 >
-                  Salvar
+                  {t('reports.saveCorrection')}
                 </button>
               </div>
             </form>

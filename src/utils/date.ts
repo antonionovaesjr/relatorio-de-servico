@@ -9,10 +9,10 @@ export function parseMonthKey(monthKey: string): { year: number; month: number }
   return { year, month };
 }
 
-export function formatMonthLabel(monthKey: string): string {
+export function formatMonthLabel(monthKey: string, locale = 'pt-BR'): string {
   const { year, month } = parseMonthKey(monthKey);
   const date = new Date(year, month - 1, 1);
-  return date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  return date.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
 }
 
 export function calculateServiceYear(monthKey: string): number {
@@ -61,10 +61,10 @@ export function calculateServiceYearFromDate(dateStr: string): number {
   return calculateServiceYear(monthKey);
 }
 
-export function formatDailyDate(dateStr: string): string {
+export function formatDailyDate(dateStr: string, locale = 'pt-BR'): string {
   const [year, month, day] = dateStr.split('-').map(Number);
   const date = new Date(year, month - 1, day);
-  return date.toLocaleDateString('pt-BR', {
+  return date.toLocaleDateString(locale, {
     weekday: 'short',
     day: '2-digit',
     month: 'short',

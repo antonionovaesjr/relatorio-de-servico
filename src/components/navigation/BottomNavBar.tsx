@@ -1,6 +1,7 @@
 import React from 'react';
-import { MessageSquare, Paperclip, Plus, User, HelpCircle } from 'lucide-react';
+import { Home, FilePenLine, Plus, Settings, HelpCircle } from 'lucide-react';
 import { triggerHaptic } from '../../utils/haptics';
+import { useTranslation } from '../../i18n/I18nContext';
 
 export type TabType = 'home' | 'report' | 'settings' | 'help';
 
@@ -15,10 +16,12 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
   onTabChange,
   onOpenRegisterModal,
 }) => {
+  const { t } = useTranslation();
+
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-[#1F2C34] border-t border-[#E1E1E1] dark:border-[#2A3942] pb-[env(safe-area-inset-bottom,10px)] transition-colors duration-200 shadow-md">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-[#111A29] border-t border-[#DDE3EA] dark:border-[#1F2E44] pb-[env(safe-area-inset-bottom,10px)] transition-colors duration-200 shadow-lg">
       <div className="max-w-md mx-auto px-3 h-16 flex items-center justify-between relative">
-        {/* 💬 Início */}
+        {/* 🏠 Início */}
         <button
           type="button"
           onClick={() => {
@@ -26,27 +29,27 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
             onTabChange('home');
           }}
           className={`flex flex-col items-center justify-center flex-1 h-full transition-all active:scale-95 ${
-            currentTab === 'home' ? 'text-[#01D65A]' : 'text-[#657484] dark:text-[#8696A0]'
+            currentTab === 'home' ? 'text-[#001E62] dark:text-[#60A5FA]' : 'text-[#5C6B7E] dark:text-[#94A3B8]'
           }`}
-          aria-label="Início"
+          aria-label={t('nav.home')}
         >
           <div className="p-1">
-            <MessageSquare
+            <Home
               className={`w-6 h-6 transition-all ${
                 currentTab === 'home'
-                  ? 'fill-[#01D65A] stroke-[#01D65A]'
-                  : 'fill-none stroke-current'
+                  ? 'stroke-[2.5] stroke-[#001E62] dark:stroke-[#60A5FA]'
+                  : 'stroke-[1.8] stroke-current'
               }`}
             />
           </div>
           {currentTab === 'home' && (
             <span className="text-[10px] font-bold tracking-tight animate-fade-in">
-              Início
+              {t('nav.home')}
             </span>
           )}
         </button>
 
-        {/* 📎 Relatórios */}
+        {/* 📝 Registros */}
         <button
           type="button"
           onClick={() => {
@@ -54,22 +57,22 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
             onTabChange('report');
           }}
           className={`flex flex-col items-center justify-center flex-1 h-full transition-all active:scale-95 ${
-            currentTab === 'report' ? 'text-[#01D65A]' : 'text-[#657484] dark:text-[#8696A0]'
+            currentTab === 'report' ? 'text-[#001E62] dark:text-[#60A5FA]' : 'text-[#5C6B7E] dark:text-[#94A3B8]'
           }`}
-          aria-label="Relatórios"
+          aria-label={t('nav.reports')}
         >
           <div className="p-1">
-            <Paperclip
+            <FilePenLine
               className={`w-6 h-6 transition-all ${
                 currentTab === 'report'
-                  ? 'stroke-[2.8] stroke-[#01D65A]'
+                  ? 'stroke-[2.5] stroke-[#001E62] dark:stroke-[#60A5FA]'
                   : 'stroke-[1.8] stroke-current'
               }`}
             />
           </div>
           {currentTab === 'report' && (
             <span className="text-[10px] font-bold tracking-tight animate-fade-in">
-              Relatórios
+              {t('nav.reports')}
             </span>
           )}
         </button>
@@ -82,15 +85,15 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
               triggerHaptic(15);
               onOpenRegisterModal();
             }}
-            className="w-14 h-14 rounded-full bg-[#01D65A] hover:bg-[#019444] text-white shadow-lg flex items-center justify-center transition-all duration-200 active:scale-90 ring-4 ring-white dark:ring-[#1F2C34]"
-            title="Novo Registro Diário"
-            aria-label="Novo Registro Diário"
+            className="w-14 h-14 rounded-full bg-[#001E62] hover:bg-[#001545] text-white dark:bg-[#1D4ED8] dark:hover:bg-[#2563EB] shadow-xl flex items-center justify-center transition-all duration-200 active:scale-90 ring-4 ring-white dark:ring-[#111A29]"
+            title={t('nav.newEntry')}
+            aria-label={t('nav.newEntry')}
           >
             <Plus className="w-8 h-8 stroke-[3]" />
           </button>
         </div>
 
-        {/* 👤 Configurações */}
+        {/* ⚙️ Configurações */}
         <button
           type="button"
           onClick={() => {
@@ -98,22 +101,22 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
             onTabChange('settings');
           }}
           className={`flex flex-col items-center justify-center flex-1 h-full transition-all active:scale-95 ${
-            currentTab === 'settings' ? 'text-[#01D65A]' : 'text-[#657484] dark:text-[#8696A0]'
+            currentTab === 'settings' ? 'text-[#001E62] dark:text-[#60A5FA]' : 'text-[#5C6B7E] dark:text-[#94A3B8]'
           }`}
-          aria-label="Configurações"
+          aria-label={t('nav.settings')}
         >
           <div className="p-1">
-            <User
+            <Settings
               className={`w-6 h-6 transition-all ${
                 currentTab === 'settings'
-                  ? 'fill-[#01D65A] stroke-[#01D65A]'
-                  : 'fill-none stroke-current'
+                  ? 'stroke-[2.5] stroke-[#001E62] dark:stroke-[#60A5FA]'
+                  : 'stroke-[1.8] stroke-current'
               }`}
             />
           </div>
           {currentTab === 'settings' && (
             <span className="text-[10px] font-bold tracking-tight animate-fade-in">
-              Configurações
+              {t('nav.settings')}
             </span>
           )}
         </button>
@@ -126,22 +129,22 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
             onTabChange('help');
           }}
           className={`flex flex-col items-center justify-center flex-1 h-full transition-all active:scale-95 ${
-            currentTab === 'help' ? 'text-[#01D65A]' : 'text-[#657484] dark:text-[#8696A0]'
+            currentTab === 'help' ? 'text-[#001E62] dark:text-[#60A5FA]' : 'text-[#5C6B7E] dark:text-[#94A3B8]'
           }`}
-          aria-label="Ajuda"
+          aria-label={t('nav.help')}
         >
           <div className="p-1">
             <HelpCircle
               className={`w-6 h-6 transition-all ${
                 currentTab === 'help'
-                  ? 'fill-[#01D65A] text-white stroke-[#01D65A]'
-                  : 'fill-none stroke-current'
+                  ? 'stroke-[2.5] stroke-[#001E62] dark:stroke-[#60A5FA]'
+                  : 'stroke-[1.8] stroke-current'
               }`}
             />
           </div>
           {currentTab === 'help' && (
             <span className="text-[10px] font-bold tracking-tight animate-fade-in">
-              Ajuda
+              {t('nav.help')}
             </span>
           )}
         </button>

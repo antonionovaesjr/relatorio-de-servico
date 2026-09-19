@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { X, Share2, Check, Copy } from 'lucide-react';
+import { X, Check, Copy, ClipboardCheck } from 'lucide-react';
 import { triggerHaptic } from '../../../utils/haptics';
 import { formatMonthLabel } from '../../../utils/date';
+import { useTranslation } from '../../../i18n/I18nContext';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -32,6 +33,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   notes,
   publisherName,
 }) => {
+  const { t, locale } = useTranslation();
   const [localIsAux, setLocalIsAux] = useState<boolean>(Boolean(isAuxiliaryPioneer));
   const [localHasReduced, setLocalHasReduced] = useState<boolean>(Boolean(hasReducedRequirement));
   const [copiedFeedback, setCopiedFeedback] = useState(false);
@@ -44,7 +46,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
     setLocalHasReduced(Boolean(hasReducedRequirement));
   }, [hasReducedRequirement]);
 
-  const formattedMonth = formatMonthLabel(monthKey);
+  const formattedMonth = formatMonthLabel(monthKey, locale);
   const uppercaseMonth = formattedMonth.toUpperCase();
 
   const handleToggleAux = (checked: boolean) => {
@@ -67,34 +69,38 @@ export const ShareModal: React.FC<ShareModalProps> = ({
     onUpdateReport?.({ isAuxiliaryPioneer: newAux, hasReducedRequirement: checked });
   };
 
-  // Compilação do texto exato no formato WhatsApp v9
+  // Compilação do texto exato para copiar
   const previewText = useMemo(() => {
+    const isPioneer =
+      userRole === 'regular_pioneer' ||
+      userRole === 'auxiliary_pioneer' ||
+      (isPublisher && localIsAux);
+
     const lines: string[] = [
-      `RELATÓRIOS DE ${uppercaseMonth}`,
+      t('share.template.title', { month: uppercaseMonth }),
       '────────────────────────────────',
-      publisherName?.trim() ? `Publicador: ${publisherName.trim()}` : '',
-      `Total de estudos: ${bibleStudies}`,
-      `Total de horas: ${hoursFormatted}`,
+      publisherName?.trim() ? t('share.template.publisher', { name: publisherName.trim() }) : '',
+      t('share.template.bibleStudies', { count: bibleStudies }),
     ].filter(Boolean);
 
-    if (isPublisher) {
-      if (localIsAux) {
-        lines.push(`Pioneiro auxiliar: ☑ Sim${localHasReduced ? ' (50% — mês especial)' : ''}`);
-      } else {
-        lines.push(`Pioneiro auxiliar: ☐ Não`);
+    if (isPioneer) {
+      lines.push(t('share.template.hours', { hours: hoursFormatted }));
+
+      if (isPublisher && localIsAux) {
+        lines.push(localHasReduced ? t('share.template.auxYesSpecial') : t('share.template.auxYes'));
+      } else if (userRole === 'auxiliary_pioneer') {
+        lines.push(t('share.template.auxYes'));
+      } else if (userRole === 'regular_pioneer') {
+        lines.push(t('share.template.regularYes'));
       }
-    } else if (userRole === 'auxiliary_pioneer') {
-      lines.push(`Pioneiro auxiliar: ☑ Sim`);
-    } else if (userRole === 'regular_pioneer') {
-      lines.push(`Pioneiro regular: ☑ Sim`);
     }
 
     if (notes?.trim()) {
-      lines.push(`Observações: ${notes.trim()}`);
+      lines.push(t('share.template.remarks', { notes: notes.trim() }));
     }
 
     lines.push('────────────────────────────────');
-    lines.push('Gerado pelo Relógio de Serviço PWA 🟢');
+    lines.push(t('share.template.watermark'));
 
     return lines.join('\n');
   }, [
@@ -107,52 +113,41 @@ export const ShareModal: React.FC<ShareModalProps> = ({
     localIsAux,
     localHasReduced,
     notes,
+    t,
   ]);
 
   if (!isOpen) return null;
 
-  const handleShare = async () => {
-    triggerHaptic(15);
-    const title = `Relatório de Serviço — ${formattedMonth}`;
-
-    if (typeof navigator !== 'undefined' && navigator.share) {
-      try {
-        await navigator.share({
-          title,
-          text: previewText,
-        });
-        onClose();
-        return;
-      } catch (err) {
-        if (err instanceof Error && err.name === 'AbortError') {
-          return;
-        }
-      }
-    }
-
-    // Fallback: abrir direto no WhatsApp ou copiar
-    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(previewText)}`;
-    window.open(waUrl, '_blank', 'noopener,noreferrer');
-  };
-
   const handleCopy = async () => {
-    triggerHaptic(10);
+    triggerHaptic(12);
     if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(previewText);
-      setCopiedFeedback(true);
-      setTimeout(() => setCopiedFeedback(false), 2000);
+      try {
+        await navigator.clipboard.writeText(previewText);
+        setCopiedFeedback(true);
+        setTimeout(() => setCopiedFeedback(false), 2500);
+      } catch {
+        // Fallback para textarea temporário caso clipboard API falhe
+        const textarea = document.createElement('textarea');
+        textarea.value = previewText;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        setCopiedFeedback(true);
+        setTimeout(() => setCopiedFeedback(false), 2500);
+      }
     }
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/60 backdrop-blur-xs animate-fade-in">
-      <div className="bg-white dark:bg-[#1F2C34] rounded-2xl w-full max-w-md border border-[#E1E1E1] dark:border-[#2A3942] shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
-        {/* Cabeçalho */}
-        <header className="h-14 bg-[#01D65A] text-white px-4 flex items-center justify-between shrink-0 shadow-sm">
+      <div className="bg-white dark:bg-[#111A29] rounded-2xl w-full max-w-md border border-[#E1E1E1] dark:border-[#1F2E44] shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+        {/* Cabeçalho Midnight Blue (#001E62) */}
+        <header className="h-14 bg-[#001E62] text-white px-4 flex items-center justify-between shrink-0 shadow-sm">
           <div className="flex items-center gap-2">
-            <span className="text-lg">📤</span>
+            <ClipboardCheck className="w-5 h-5 text-white/90" />
             <h3 className="text-sm font-bold tracking-tight">
-              Compartilhar Relatórios — {formattedMonth}
+              {t('share.copyTitle', { month: formattedMonth })}
             </h3>
           </div>
           <button
@@ -166,22 +161,22 @@ export const ShareModal: React.FC<ShareModalProps> = ({
 
         <div className="p-4 space-y-3.5 overflow-y-auto flex-1">
           <div>
-            <label className="block text-xs font-semibold text-[#657484] dark:text-[#8696A0] mb-1.5">
-              💬 Prévia do texto compartilhado
+            <label className="block text-xs font-semibold text-[#657484] dark:text-[#CBD5E1] mb-1.5">
+              {t('share.previewLabel')}
             </label>
-            <div className="p-3 rounded-xl bg-[#F0F2F5] dark:bg-[#111B26] border border-[#E1E1E1] dark:border-[#2A3942] text-[#111B1F] dark:text-[#E9EDEF] text-xs font-mono whitespace-pre-wrap leading-relaxed select-text max-h-64 overflow-y-auto">
+            <div className="p-3 rounded-xl bg-[#F0F2F5] dark:bg-[#0B1320] border border-[#E1E1E1] dark:border-[#25364E] text-[#111B1F] dark:text-[#F8FAFC] text-xs font-mono whitespace-pre-wrap leading-relaxed select-text max-h-60 overflow-y-auto">
               {previewText}
             </div>
           </div>
 
           {/* Opções Teocráticas do Mês — SOMENTE SE FOR PUBLICADOR */}
           {isPublisher && (
-            <div className="p-3 rounded-xl bg-[#F0F2F5] dark:bg-[#111B26] border border-[#E1E1E1] dark:border-[#2A3942] space-y-2.5">
+            <div className="p-3 rounded-xl bg-[#F0F2F5] dark:bg-[#0B1320] border border-[#E1E1E1] dark:border-[#25364E] space-y-2.5">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-[#008069] dark:text-[#01D65A] uppercase tracking-wider">
-                  Neste mês (Publicador)
+                <span className="text-[11px] font-bold text-[#001E62] dark:text-[#93C5FD] uppercase tracking-wider">
+                  {t('share.thisMonthPublisher')}
                 </span>
-                <span className="text-[10px] text-[#657484] dark:text-[#8696A0]">
+                <span className="text-[10px] text-[#657484] dark:text-[#94A3B8]">
                   {formattedMonth}
                 </span>
               </div>
@@ -192,10 +187,10 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                   type="checkbox"
                   checked={localIsAux}
                   onChange={(e) => handleToggleAux(e.target.checked)}
-                  className="w-4 h-4 rounded text-[#01D65A] focus:ring-[#01D65A] border-[#657484]/40 accent-[#01D65A]"
+                  className="w-4 h-4 rounded text-[#001E62] dark:text-[#3B82F6] focus:ring-[#001E62] border-[#657484]/40 accent-[#001E62] dark:accent-[#3B82F6]"
                 />
-                <span className="text-xs font-semibold text-[#111B1F] dark:text-[#E9EDEF]">
-                  Mês como pioneiro auxiliar
+                <span className="text-xs font-semibold text-[#111B1F] dark:text-[#F8FAFC]">
+                  {t('share.monthAsAux')}
                 </span>
               </label>
 
@@ -209,15 +204,15 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                   type="checkbox"
                   checked={localHasReduced && localIsAux}
                   onChange={(e) => handleToggleReduced(e.target.checked)}
-                  className="w-4 h-4 rounded text-[#01D65A] focus:ring-[#01D65A] border-[#657484]/40 accent-[#01D65A]"
+                  className="w-4 h-4 rounded text-[#001E62] dark:text-[#3B82F6] focus:ring-[#001E62] border-[#657484]/40 accent-[#001E62] dark:accent-[#3B82F6]"
                 />
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-semibold text-[#111B1F] dark:text-[#E9EDEF]">
-                    50% (mês especial)
+                  <span className="text-xs font-semibold text-[#111B1F] dark:text-[#F8FAFC]">
+                    {t('share.special50')}
                   </span>
                   {!localIsAux && (
-                    <span className="text-[10px] text-[#657484] dark:text-[#8696A0]">
-                      (ativa pioneiro aux.)
+                    <span className="text-[10px] text-[#657484] dark:text-[#94A3B8]">
+                      {t('share.enablesAux')}
                     </span>
                   )}
                 </div>
@@ -226,38 +221,38 @@ export const ShareModal: React.FC<ShareModalProps> = ({
           )}
 
           {copiedFeedback && (
-            <div className="flex items-center justify-center gap-1.5 p-2 rounded-xl bg-[#E1FFD2] dark:bg-[#005C4B]/60 text-[#008069] dark:text-[#01D65A] text-xs font-semibold">
-              <Check className="w-4 h-4" />
-              <span>Copiado para a área de transferência!</span>
+            <div className="flex items-center justify-center gap-2 p-2.5 rounded-xl bg-[#E8EEF8] dark:bg-[#172554] text-[#001E62] dark:text-[#93C5FD] text-xs font-bold border border-[#001E62]/30 dark:border-[#3B82F6]/40 animate-pulse">
+              <Check className="w-4 h-4 stroke-[3]" />
+              <span>{t('share.copiedNotice')}</span>
             </div>
           )}
 
           {/* Botões */}
-          <div className="flex gap-2 pt-1">
+          <div className="flex gap-2 pt-2">
             <button
               type="button"
               onClick={handleCopy}
-              className="py-2.5 px-3 rounded-xl border border-[#657484]/30 bg-[#F0F2F5] dark:bg-[#111B26] hover:bg-slate-200 dark:hover:bg-slate-800 text-[#111B1F] dark:text-[#E9EDEF] text-xs font-semibold active:scale-95 transition-all flex items-center justify-center gap-1.5"
+              className="flex-1 py-3 px-4 rounded-xl bg-[#001E62] hover:bg-[#001545] text-white dark:bg-[#1D4ED8] dark:hover:bg-[#2563EB] dark:border dark:border-[#60A5FA]/40 text-xs font-bold shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2"
             >
-              <Copy className="w-3.5 h-3.5" />
-              <span>Copiar</span>
+              {copiedFeedback ? (
+                <>
+                  <Check className="w-4 h-4 stroke-[3]" />
+                  <span>{t('share.copiedButton')}</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4" />
+                  <span>{t('share.copyButton')}</span>
+                </>
+              )}
             </button>
 
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 px-3 rounded-xl border border-[#657484]/30 text-[#657484] dark:text-[#8696A0] text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="py-3 px-4 rounded-xl border border-[#657484]/30 dark:border-[#25364E] text-[#657484] dark:text-[#CBD5E1] text-xs font-semibold hover:bg-slate-100 dark:hover:bg-[#162236] transition-colors active:scale-95"
             >
-              Cancelar
-            </button>
-
-            <button
-              type="button"
-              onClick={handleShare}
-              className="flex-1 py-2.5 px-3 rounded-xl bg-[#01D65A] hover:bg-[#019444] text-white text-xs font-bold shadow-sm active:scale-95 transition-all flex items-center justify-center gap-1.5"
-            >
-              <Share2 className="w-4 h-4" />
-              <span>Compartilhar</span>
+              {t('common.close')}
             </button>
           </div>
         </div>

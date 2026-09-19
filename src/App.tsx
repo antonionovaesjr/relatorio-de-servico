@@ -9,13 +9,14 @@ import { DailyEntryModal } from './features/register/DailyEntryModal';
 import { SettingsView } from './features/settings/SettingsView';
 import { HelpView } from './features/help/HelpView';
 import { getMonthKey } from './utils/date';
+import { I18nProvider } from './i18n/I18nContext';
 
 export const App: React.FC = () => {
   const [currentTab, setCurrentTab] = useState<TabType>('home');
   const [selectedReportMonth, setSelectedReportMonth] = useState<string>(() => getMonthKey(new Date()));
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const settings = useUserSettings();
-  const [activeTheme, setActiveTheme] = useState<AppTheme>('system');
+  const [activeTheme, setActiveTheme] = useState<AppTheme>('light');
 
   // Inicializa o banco de dados
   useEffect(() => {
@@ -28,6 +29,12 @@ export const App: React.FC = () => {
       setActiveTheme(settings.theme);
     }
   }, [settings.theme]);
+
+  // Sincroniza o tamanho da fonte
+  useEffect(() => {
+    const size = settings.fontSize || 'normal';
+    document.documentElement.setAttribute('data-font-size', size);
+  }, [settings.fontSize]);
 
   // Aplica classe 'dark' no documento
   useEffect(() => {
@@ -73,7 +80,7 @@ export const App: React.FC = () => {
   };
 
   return (
-    <>
+    <I18nProvider language={settings.language || 'pt-BR'}>
       <Layout
         currentTab={currentTab}
         onTabChange={setCurrentTab}
@@ -107,7 +114,7 @@ export const App: React.FC = () => {
         isOpen={isRegisterModalOpen}
         onClose={() => setIsRegisterModalOpen(false)}
       />
-    </>
+    </I18nProvider>
   );
 };
 

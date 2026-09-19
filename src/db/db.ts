@@ -12,8 +12,9 @@ export const DEFAULT_SETTINGS: UserSettings = {
   id: 'current_user',
   publisherName: '',
   role: 'publisher',
-  theme: 'system',
+  theme: 'light',
   language: 'pt-BR',
+  fontSize: 'normal',
   revisitNotificationDays: 1,
   scheduledBackupEnabled: false,
   updatedAt: new Date().toISOString(),
@@ -148,6 +149,27 @@ export async function importDatabaseFromJson(jsonString: string): Promise<void> 
       if (parsed.dailyEntries && parsed.dailyEntries.length > 0) {
         await db.dailyEntries.bulkPut(parsed.dailyEntries);
       }
+    }
+  );
+}
+
+// Limpeza atômica da base de dados e restauração das configurações padrão
+export async function clearDatabase(): Promise<void> {
+  await db.transaction(
+    'rw',
+    db.settings,
+    db.monthlyReports,
+    db.returnVisits,
+    db.dailyEntries,
+    async () => {
+      await db.settings.clear();
+      await db.monthlyReports.clear();
+      await db.returnVisits.clear();
+      await db.dailyEntries.clear();
+      await db.settings.put({
+        ...DEFAULT_SETTINGS,
+        updatedAt: new Date().toISOString(),
+      });
     }
   );
 }

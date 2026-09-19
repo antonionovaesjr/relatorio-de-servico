@@ -14,6 +14,8 @@ import {
   ShieldCheck,
   AlertTriangle,
   Check,
+  Type,
+  Trash2,
 } from 'lucide-react';
 
 import {
@@ -22,9 +24,11 @@ import {
   exportDatabaseToJson,
   downloadBackupFile,
   importDatabaseFromJson,
+  clearDatabase,
 } from '../../db/db';
-import type { UserSettings, UserRole, AppTheme, AppLanguage } from '../../types/models';
+import type { UserSettings, UserRole, AppTheme, AppLanguage, AppFontSize } from '../../types/models';
 import { triggerHaptic } from '../../utils/haptics';
+import { useTranslation } from '../../i18n/I18nContext';
 
 interface SettingsViewProps {
   currentTheme: AppTheme;
@@ -32,6 +36,7 @@ interface SettingsViewProps {
 }
 
 export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThemeChange }) => {
+  const { t } = useTranslation();
   const settings = useUserSettings();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -39,6 +44,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
   const [backupSuccess, setBackupSuccess] = useState<string | null>(null);
   const [pendingFileContent, setPendingFileContent] = useState<string | null>(null);
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
+  const [isClearDbModalOpen, setIsClearDbModalOpen] = useState(false);
+  const [clearDbSuccess, setClearDbSuccess] = useState<string | null>(null);
 
   // Atualização atômica das configurações
   const updateSettings = async (patch: Partial<UserSettings>) => {
@@ -117,7 +124,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
         await navigator.share({
           files: [file],
           title: 'Backup Relatório de Serviço PWA',
-          text: 'Arquivo de backup criptografado dos relatórios de serviço.',
+          text: 'Arquivo de backup dos relatórios de serviço.',
         });
       } else {
         // Fallback para download direto
@@ -166,6 +173,19 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
     }
   };
 
+  // Confirmação de limpeza da base de dados
+  const handleConfirmClearDb = async () => {
+    triggerHaptic(20);
+    try {
+      await clearDatabase();
+      setIsClearDbModalOpen(false);
+      setClearDbSuccess(t('settings.clearDbSuccess'));
+      setTimeout(() => setClearDbSuccess(null), 3500);
+    } catch (error) {
+      console.error('Erro ao limpar base de dados:', error);
+    }
+  };
+
   // Toggle do switch de notificação de backup agendado
   const handleToggleScheduledBackup = async () => {
     triggerHaptic(10);
@@ -180,12 +200,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
 
   return (
     <div className="space-y-3.5 pb-6 select-none animate-fade-in">
-      {/* 🟢 PERFIL */}
-      <section className="bg-white dark:bg-[#1F2C34] rounded-xl p-4 border border-[#E1E1E1] dark:border-[#2A3942] shadow-sm space-y-3.5">
-        <div className="flex items-center gap-2 pb-2 border-b border-[#E1E1E1] dark:border-[#2A3942]">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#01D65A]" />
-          <h2 className="text-xs font-bold text-[#008069] dark:text-[#01D65A] tracking-wider uppercase">
-            🟢 Perfil
+      {/* 🟦 PERFIL */}
+      <section className="bg-white dark:bg-[#111A29] rounded-xl p-4 border border-[#E1E1E1] dark:border-[#1F2E44] shadow-sm space-y-3.5">
+        <div className="flex items-center gap-2 pb-2 border-b border-[#E1E1E1] dark:border-[#1F2E44]">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#001E62] dark:bg-[#60A5FA]" />
+          <h2 className="text-xs font-bold text-[#001E62] dark:text-[#93C5FD] tracking-wider uppercase">
+            {t('settings.publisherProfile')}
           </h2>
         </div>
 
@@ -196,17 +216,17 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
               <img
                 src={settings.avatarUrl}
                 alt="Foto do perfil"
-                className="w-16 h-16 rounded-full object-cover border-2 border-[#01D65A] shadow-sm"
+                className="w-16 h-16 rounded-full object-cover border-2 border-[#001E62] dark:border-[#3B82F6] shadow-sm"
               />
             ) : (
-              <div className="w-16 h-16 rounded-full bg-[#008069] dark:bg-[#005C4B] text-white flex items-center justify-center font-bold text-xl border-2 border-[#01D65A] shadow-sm">
+              <div className="w-16 h-16 rounded-full bg-[#001E62] dark:bg-[#1E3A8A] text-white flex items-center justify-center font-bold text-xl border-2 border-[#001E62] dark:border-[#3B82F6] shadow-sm">
                 {settings.publisherName ? settings.publisherName.charAt(0).toUpperCase() : <User className="w-8 h-8" />}
               </div>
             )}
             <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
               <Camera className="w-5 h-5 text-white" />
             </div>
-            <div className="absolute bottom-0 right-0 p-1.5 rounded-full bg-[#01D65A] text-white shadow-xs">
+            <div className="absolute bottom-0 right-0 p-1.5 rounded-full bg-[#001E62] dark:bg-[#2563EB] text-white shadow-xs">
               <Camera className="w-3 h-3" />
             </div>
             <input
@@ -219,34 +239,74 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
           </div>
 
           <div className="flex-1">
-            <label className="block text-xs font-semibold text-[#657484] dark:text-[#8696A0] mb-1">
-              Nome do Publicador
+            <label className="block text-xs font-semibold text-[#5C6B7E] dark:text-[#CBD5E1] mb-1">
+              {t('settings.publisherName')}
             </label>
             <input
               type="text"
               value={settings.publisherName}
               onChange={(e) => updateSettings({ publisherName: e.target.value })}
-              placeholder="Ex: João Silva"
-              className="w-full bg-[#F0F2F5] dark:bg-[#111B26] text-[#111B1F] dark:text-[#E9EDEF] px-3.5 py-2.5 rounded-xl border border-[#E1E1E1] dark:border-[#2A3942] text-sm focus:outline-none focus:ring-2 focus:ring-[#01D65A]"
+              placeholder={t('settings.namePlaceholder')}
+              className="w-full bg-[#F0F2F5] dark:bg-[#0B1320] text-[#111B1F] dark:text-[#F8FAFC] placeholder:text-slate-400 dark:placeholder:text-slate-500 px-3.5 py-2.5 rounded-xl border border-[#E1E1E1] dark:border-[#25364E] text-sm focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:border-[#60A5FA]"
             />
           </div>
         </div>
       </section>
 
+      {/* 🔤 TAMANHO DA FONTE */}
+      <section className="bg-white dark:bg-[#111A29] rounded-xl p-4 border border-[#E1E1E1] dark:border-[#1F2E44] shadow-sm space-y-3">
+        <div className="flex items-center gap-2 pb-2 border-b border-[#E1E1E1] dark:border-[#1F2E44]">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#001E62] dark:bg-[#60A5FA]" />
+          <h2 className="text-xs font-bold text-[#001E62] dark:text-[#93C5FD] tracking-wider uppercase">
+            {t('settings.fontSizeSection')}
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-4 gap-2">
+          {[
+            { id: 'small', label: t('settings.fontSmall'), size: '14px' },
+            { id: 'normal', label: t('settings.fontNormal'), size: '16px' },
+            { id: 'large', label: t('settings.fontLarge'), size: '18px' },
+            { id: 'xlarge', label: t('settings.fontXLarge'), size: '20px' },
+          ].map((f) => {
+            const isSelected = (settings.fontSize || 'normal') === f.id;
+            return (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => {
+                  triggerHaptic(8);
+                  updateSettings({ fontSize: f.id as AppFontSize });
+                }}
+                className={`py-2.5 px-1.5 rounded-xl border flex flex-col items-center justify-center transition-all ${
+                  isSelected
+                    ? 'bg-[#001E62] text-white border-[#001E62] dark:bg-[#1D4ED8] dark:border-[#60A5FA] dark:text-white shadow-sm dark:shadow-blue-900/50'
+                    : 'bg-[#F0F2F5] dark:bg-[#0B1320] text-[#111B1F] dark:text-[#F8FAFC] border-[#E1E1E1] dark:border-[#202E42] hover:dark:bg-[#162236] hover:dark:border-[#3B82F6]/50'
+                }`}
+              >
+                <Type className="w-4 h-4 mb-0.5" />
+                <span className="text-[11px] font-bold">{f.label}</span>
+                <span className="text-[9px] text-[#657484] dark:text-[#94A3B8] font-medium">{f.size}</span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
       {/* 🏷️ DESIGNAÇÃO ATUAL */}
-      <section className="bg-white dark:bg-[#1F2C34] rounded-xl p-4 border border-[#E1E1E1] dark:border-[#2A3942] shadow-sm space-y-3">
-        <div className="flex items-center gap-2 pb-2 border-b border-[#E1E1E1] dark:border-[#2A3942]">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#01D65A]" />
-          <h2 className="text-xs font-bold text-[#008069] dark:text-[#01D65A] tracking-wider uppercase">
-            🏷️ Designação Atual
+      <section className="bg-white dark:bg-[#111A29] rounded-xl p-4 border border-[#E1E1E1] dark:border-[#1F2E44] shadow-sm space-y-3">
+        <div className="flex items-center gap-2 pb-2 border-b border-[#E1E1E1] dark:border-[#1F2E44]">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#001E62] dark:bg-[#60A5FA]" />
+          <h2 className="text-xs font-bold text-[#001E62] dark:text-[#93C5FD] tracking-wider uppercase">
+            {t('settings.roleSection')}
           </h2>
         </div>
 
         <div className="space-y-2">
           {[
-            { id: 'publisher', label: 'Publicador' },
-            { id: 'auxiliary_pioneer', label: 'Pioneiro Auxiliar' },
-            { id: 'regular_pioneer', label: 'Pioneiro Regular' },
+            { id: 'publisher', label: t('roles.publisher') },
+            { id: 'auxiliary_pioneer', label: t('roles.auxiliary') },
+            { id: 'regular_pioneer', label: t('roles.regular') },
           ].map((item) => {
             const isSelected = settings.role === item.id;
             return (
@@ -255,21 +315,23 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
                 onClick={() => handleRoleChange(item.id as UserRole)}
                 className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${
                   isSelected
-                    ? 'bg-[#E1FFD2]/60 dark:bg-[#005C4B]/40 border-[#01D65A] font-bold text-[#111B1F] dark:text-[#E9EDEF]'
-                    : 'bg-[#F0F2F5] dark:bg-[#111B26] border-[#E1E1E1] dark:border-[#2A3942] text-[#657484] dark:text-[#8696A0]'
+                    ? 'bg-[#E8EEF8] dark:bg-[#172554] border-[#001E62] dark:border-[#3B82F6] font-bold text-[#001E62] dark:text-white shadow-xs'
+                    : 'bg-[#F0F2F5] dark:bg-[#0B1320] border-[#E1E1E1] dark:border-[#202E42] text-[#111B1F] dark:text-[#F8FAFC] hover:dark:bg-[#162236] hover:dark:border-[#3B82F6]/40'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                      isSelected ? 'border-[#01D65A] bg-[#01D65A]' : 'border-[#657484]/50'
+                    className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${
+                      isSelected
+                        ? 'border-[#001E62] bg-[#001E62] dark:border-[#60A5FA] dark:bg-[#3B82F6]'
+                        : 'border-[#657484]/50 dark:border-slate-500'
                     }`}
                   >
                     {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                   </div>
                   <span className="text-xs">{item.label}</span>
                 </div>
-                {isSelected && <Check className="w-4 h-4 text-[#019444] dark:text-[#01D65A]" />}
+                {isSelected && <Check className="w-4 h-4 text-[#001E62] dark:text-[#60A5FA] stroke-[2.5]" />}
               </label>
             );
           })}
@@ -278,18 +340,18 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
 
       {/* 📅 PERÍODO DA DESIGNAÇÃO & METAS (se pioneiro) */}
       {settings.role !== 'publisher' && (
-        <section className="bg-white dark:bg-[#1F2C34] rounded-xl p-4 border border-[#E1E1E1] dark:border-[#2A3942] shadow-sm space-y-3">
-          <div className="flex items-center gap-2 pb-2 border-b border-[#E1E1E1] dark:border-[#2A3942]">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#01D65A]" />
-            <h2 className="text-xs font-bold text-[#008069] dark:text-[#01D65A] tracking-wider uppercase">
+        <section className="bg-white dark:bg-[#111A29] rounded-xl p-4 border border-[#E1E1E1] dark:border-[#1F2E44] shadow-sm space-y-3">
+          <div className="flex items-center gap-2 pb-2 border-b border-[#E1E1E1] dark:border-[#1F2E44]">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#001E62] dark:bg-[#60A5FA]" />
+            <h2 className="text-xs font-bold text-[#001E62] dark:text-[#93C5FD] tracking-wider uppercase">
               📅 Período da Designação
             </h2>
           </div>
 
           <div className="grid grid-cols-2 gap-2.5">
             <div>
-              <label className="flex items-center gap-1 text-[11px] font-semibold text-[#657484] dark:text-[#8696A0] mb-1">
-                <Calendar className="w-3 h-3 text-[#01D65A]" />
+              <label className="flex items-center gap-1 text-[11px] font-semibold text-[#5C6B7E] dark:text-[#CBD5E1] mb-1">
+                <Calendar className="w-3 h-3 text-[#001E62] dark:text-[#60A5FA]" />
                 <span>Início:</span>
               </label>
               <input
@@ -318,13 +380,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
                     });
                   }
                 }}
-                className="w-full bg-[#F0F2F5] dark:bg-[#111B26] text-[#111B1F] dark:text-[#E9EDEF] px-3 py-2 rounded-xl border border-[#E1E1E1] dark:border-[#2A3942] text-xs focus:outline-none focus:ring-2 focus:ring-[#01D65A]"
+                className="w-full bg-[#F0F2F5] dark:bg-[#0B1320] text-[#111B1F] dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E1E1E1] dark:border-[#25364E] text-xs focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:border-[#60A5FA]"
               />
             </div>
 
             <div>
-              <label className="flex items-center gap-1 text-[11px] font-semibold text-[#657484] dark:text-[#8696A0] mb-1">
-                <Calendar className="w-3 h-3 text-[#01D65A]" />
+              <label className="flex items-center gap-1 text-[11px] font-semibold text-[#5C6B7E] dark:text-[#CBD5E1] mb-1">
+                <Calendar className="w-3 h-3 text-[#001E62] dark:text-[#60A5FA]" />
                 <span>Fim (opcional):</span>
               </label>
               <input
@@ -347,14 +409,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
                   }
                 }}
                 disabled={settings.role === 'regular_pioneer'}
-                className="w-full bg-[#F0F2F5] dark:bg-[#111B26] text-[#111B1F] dark:text-[#E9EDEF] px-3 py-2 rounded-xl border border-[#E1E1E1] dark:border-[#2A3942] text-xs focus:outline-none focus:ring-2 focus:ring-[#01D65A] disabled:opacity-40"
+                className="w-full bg-[#F0F2F5] dark:bg-[#0B1320] text-[#111B1F] dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E1E1E1] dark:border-[#25364E] text-xs focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:border-[#60A5FA] disabled:opacity-40"
               />
             </div>
           </div>
 
           <div>
-            <label className="flex items-center gap-1 text-[11px] font-semibold text-[#657484] dark:text-[#8696A0] mb-1">
-              <Clock className="w-3 h-3 text-[#01D65A]" />
+            <label className="flex items-center gap-1 text-[11px] font-semibold text-[#5C6B7E] dark:text-[#CBD5E1] mb-1">
+              <Clock className="w-3 h-3 text-[#001E62] dark:text-[#60A5FA]" />
               <span>Horas por Mês:</span>
             </label>
             <div className="flex gap-2">
@@ -390,8 +452,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
                     }}
                     className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-colors ${
                       isSelected
-                        ? 'bg-[#01D65A] text-white border-[#01D65A]'
-                        : 'bg-[#F0F2F5] dark:bg-[#111B26] text-[#111B1F] dark:text-[#E9EDEF] border-[#E1E1E1] dark:border-[#2A3942]'
+                        ? 'bg-[#001E62] text-white border-[#001E62] dark:bg-[#1D4ED8] dark:border-[#60A5FA] shadow-sm'
+                        : 'bg-[#F0F2F5] dark:bg-[#0B1320] text-[#111B1F] dark:text-[#F8FAFC] border-[#E1E1E1] dark:border-[#202E42] hover:dark:bg-[#162236]'
                     }`}
                   >
                     {hrs}h {hrs === 15 ? '(mês especial)' : ''}
@@ -404,19 +466,19 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
       )}
 
       {/* 🌐 IDIOMA */}
-      <section className="bg-white dark:bg-[#1F2C34] rounded-xl p-4 border border-[#E1E1E1] dark:border-[#2A3942] shadow-sm space-y-3">
-        <div className="flex items-center gap-2 pb-2 border-b border-[#E1E1E1] dark:border-[#2A3942]">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#01D65A]" />
-          <h2 className="text-xs font-bold text-[#008069] dark:text-[#01D65A] tracking-wider uppercase">
-            🌐 Idioma
+      <section className="bg-white dark:bg-[#111A29] rounded-xl p-4 border border-[#E1E1E1] dark:border-[#1F2E44] shadow-sm space-y-3">
+        <div className="flex items-center gap-2 pb-2 border-b border-[#E1E1E1] dark:border-[#1F2E44]">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#001E62] dark:bg-[#60A5FA]" />
+          <h2 className="text-xs font-bold text-[#001E62] dark:text-[#93C5FD] tracking-wider uppercase">
+            🌐 {t('settings.languageLabel')}
           </h2>
         </div>
 
         <div className="grid grid-cols-3 gap-2">
           {[
-            { id: 'pt-BR', label: '🇧🇷 PT-BR' },
-            { id: 'en-US', label: '🇺🇸 EN-US' },
-            { id: 'es-ES', label: '🇪🇸 ES-ES' },
+            { id: 'pt-BR', label: '🇧🇷 Português' },
+            { id: 'en-US', label: '🇺🇸 English' },
+            { id: 'es-ES', label: '🇪🇸 Español' },
           ].map((lang) => {
             const isSelected = (settings.language || 'pt-BR') === lang.id;
             return (
@@ -429,8 +491,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
                 }}
                 className={`py-2 rounded-xl text-xs font-bold border transition-all ${
                   isSelected
-                    ? 'bg-[#01D65A] text-white border-[#01D65A]'
-                    : 'bg-[#F0F2F5] dark:bg-[#111B26] text-[#111B1F] dark:text-[#E9EDEF] border-[#E1E1E1] dark:border-[#2A3942]'
+                    ? 'bg-[#001E62] text-white border-[#001E62] dark:bg-[#1D4ED8] dark:border-[#60A5FA] shadow-sm'
+                    : 'bg-[#F0F2F5] dark:bg-[#0B1320] text-[#111B1F] dark:text-[#F8FAFC] border-[#E1E1E1] dark:border-[#202E42] hover:dark:bg-[#162236]'
                 }`}
               >
                 {lang.label}
@@ -441,17 +503,17 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
       </section>
 
       {/* 🔔 NOTIFICAÇÃO DE REVISITA (1 A 7 DIAS) */}
-      <section className="bg-white dark:bg-[#1F2C34] rounded-xl p-4 border border-[#E1E1E1] dark:border-[#2A3942] shadow-sm space-y-3">
-        <div className="flex items-center gap-2 pb-2 border-b border-[#E1E1E1] dark:border-[#2A3942]">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#01D65A]" />
-          <h2 className="text-xs font-bold text-[#008069] dark:text-[#01D65A] tracking-wider uppercase">
-            🔔 Notificação de Revisita
+      <section className="bg-white dark:bg-[#111A29] rounded-xl p-4 border border-[#E1E1E1] dark:border-[#1F2E44] shadow-sm space-y-3">
+        <div className="flex items-center gap-2 pb-2 border-b border-[#E1E1E1] dark:border-[#1F2E44]">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#001E62] dark:bg-[#60A5FA]" />
+          <h2 className="text-xs font-bold text-[#001E62] dark:text-[#93C5FD] tracking-wider uppercase">
+            🔔 {t('settings.notificationsLabel')}
           </h2>
         </div>
 
         <div>
-          <label className="flex items-center gap-1.5 text-xs font-semibold text-[#657484] dark:text-[#8696A0] mb-1.5">
-            <Bell className="w-3.5 h-3.5 text-[#01D65A]" />
+          <label className="flex items-center gap-1.5 text-xs font-semibold text-[#5C6B7E] dark:text-[#CBD5E1] mb-1.5">
+            <Bell className="w-3.5 h-3.5 text-[#001E62] dark:text-[#60A5FA]" />
             <span>⏳ Lembrar com antecedência:</span>
           </label>
           <select
@@ -460,56 +522,56 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
               triggerHaptic(8);
               updateSettings({ revisitNotificationDays: parseInt(e.target.value, 10) });
             }}
-            className="w-full bg-[#F0F2F5] dark:bg-[#111B26] text-[#111B1F] dark:text-[#E9EDEF] px-3.5 py-2.5 rounded-xl border border-[#E1E1E1] dark:border-[#2A3942] text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#01D65A]"
+            className="w-full bg-[#F0F2F5] dark:bg-[#0B1320] text-[#111B1F] dark:text-[#F8FAFC] px-3.5 py-2.5 rounded-xl border border-[#E1E1E1] dark:border-[#25364E] text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:border-[#60A5FA]"
           >
-            <option value={1}>1 dia antes</option>
-            <option value={2}>2 dias antes</option>
-            <option value={3}>3 dias antes</option>
-            <option value={4}>4 dias antes</option>
-            <option value={5}>5 dias antes</option>
-            <option value={6}>6 dias antes</option>
-            <option value={7}>7 dias antes</option>
+            <option value={1} className="bg-white dark:bg-[#111A29] text-[#111B1F] dark:text-[#F8FAFC]">{t('settings.notif1Day')}</option>
+            <option value={2} className="bg-white dark:bg-[#111A29] text-[#111B1F] dark:text-[#F8FAFC]">{t('settings.notif2Days')}</option>
+            <option value={3} className="bg-white dark:bg-[#111A29] text-[#111B1F] dark:text-[#F8FAFC]">3 dias antes</option>
+            <option value={4} className="bg-white dark:bg-[#111A29] text-[#111B1F] dark:text-[#F8FAFC]">4 dias antes</option>
+            <option value={5} className="bg-white dark:bg-[#111A29] text-[#111B1F] dark:text-[#F8FAFC]">5 dias antes</option>
+            <option value={6} className="bg-white dark:bg-[#111A29] text-[#111B1F] dark:text-[#F8FAFC]">6 dias antes</option>
+            <option value={7} className="bg-white dark:bg-[#111A29] text-[#111B1F] dark:text-[#F8FAFC]">7 dias antes</option>
           </select>
-          <p className="text-[10px] text-[#657484] dark:text-[#8696A0] mt-1">
+          <p className="text-[11px] text-[#657484] dark:text-[#94A3B8] mt-1.5 leading-relaxed">
             Gera lembrete nativo via Service Worker local sem necessidade de conexão externa.
           </p>
         </div>
       </section>
 
       {/* 🌓 TEMA */}
-      <section className="bg-white dark:bg-[#1F2C34] rounded-xl p-4 border border-[#E1E1E1] dark:border-[#2A3942] shadow-sm space-y-3">
-        <div className="flex items-center gap-2 pb-2 border-b border-[#E1E1E1] dark:border-[#2A3942]">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#01D65A]" />
-          <h2 className="text-xs font-bold text-[#008069] dark:text-[#01D65A] tracking-wider uppercase">
-            🌓 Tema Visual
+      <section className="bg-white dark:bg-[#111A29] rounded-xl p-4 border border-[#E1E1E1] dark:border-[#1F2E44] shadow-sm space-y-3">
+        <div className="flex items-center gap-2 pb-2 border-b border-[#E1E1E1] dark:border-[#1F2E44]">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#001E62] dark:bg-[#60A5FA]" />
+          <h2 className="text-xs font-bold text-[#001E62] dark:text-[#93C5FD] tracking-wider uppercase">
+            🌓 {t('settings.themeLabel')}
           </h2>
         </div>
 
         <div className="grid grid-cols-3 gap-2">
           {[
-            { id: 'light', label: 'Claro', icon: Sun },
-            { id: 'dark', label: 'Escuro', icon: Moon },
-            { id: 'system', label: 'Sistema', icon: Smartphone },
-          ].map((t) => {
-            const Icon = t.icon;
-            const isSelected = currentTheme === t.id;
+            { id: 'light', label: t('settings.themeLight'), icon: Sun },
+            { id: 'dark', label: t('settings.themeDark'), icon: Moon },
+            { id: 'system', label: t('settings.themeSystem'), icon: Smartphone },
+          ].map((themeItem) => {
+            const Icon = themeItem.icon;
+            const isSelected = currentTheme === themeItem.id;
             return (
               <button
-                key={t.id}
+                key={themeItem.id}
                 type="button"
                 onClick={() => {
                   triggerHaptic(10);
-                  onThemeChange(t.id as AppTheme);
-                  updateSettings({ theme: t.id as AppTheme });
+                  onThemeChange(themeItem.id as AppTheme);
+                  updateSettings({ theme: themeItem.id as AppTheme });
                 }}
                 className={`py-2.5 rounded-xl text-xs font-bold border flex flex-col items-center justify-center gap-1 transition-all ${
                   isSelected
-                    ? 'bg-[#01D65A] text-white border-[#01D65A]'
-                    : 'bg-[#F0F2F5] dark:bg-[#111B26] text-[#111B1F] dark:text-[#E9EDEF] border-[#E1E1E1] dark:border-[#2A3942]'
+                    ? 'bg-[#001E62] text-white border-[#001E62] dark:bg-[#1D4ED8] dark:border-[#60A5FA] shadow-sm'
+                    : 'bg-[#F0F2F5] dark:bg-[#0B1320] text-[#111B1F] dark:text-[#F8FAFC] border-[#E1E1E1] dark:border-[#202E42] hover:dark:bg-[#162236]'
                 }`}
               >
                 <Icon className="w-4 h-4" />
-                <span>{t.label}</span>
+                <span>{themeItem.label}</span>
               </button>
             );
           })}
@@ -517,21 +579,21 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
       </section>
 
       {/* 💾 BACKUP */}
-      <section className="bg-white dark:bg-[#1F2C34] rounded-xl p-4 border border-[#E1E1E1] dark:border-[#2A3942] shadow-sm space-y-3.5">
-        <div className="flex items-center gap-2 pb-2 border-b border-[#E1E1E1] dark:border-[#2A3942]">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#01D65A]" />
-          <h2 className="text-xs font-bold text-[#008069] dark:text-[#01D65A] tracking-wider uppercase">
-            💾 Backup & Restauração
+      <section className="bg-white dark:bg-[#111A29] rounded-xl p-4 border border-[#E1E1E1] dark:border-[#1F2E44] shadow-sm space-y-3.5">
+        <div className="flex items-center gap-2 pb-2 border-b border-[#E1E1E1] dark:border-[#1F2E44]">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#001E62] dark:bg-[#60A5FA]" />
+          <h2 className="text-xs font-bold text-[#001E62] dark:text-[#93C5FD] tracking-wider uppercase">
+            {t('settings.backupSection')}
           </h2>
         </div>
 
         {/* Switch Backup Agendado */}
-        <div className="flex items-center justify-between p-3 rounded-xl bg-[#F0F2F5] dark:bg-[#111B26] border border-[#E1E1E1] dark:border-[#2A3942]">
+        <div className="flex items-center justify-between p-3 rounded-xl bg-[#F0F2F5] dark:bg-[#0B1320] border border-[#E1E1E1] dark:border-[#202E42]">
           <div>
-            <span className="text-xs font-semibold text-[#111B1F] dark:text-[#E9EDEF] block">
+            <span className="text-xs font-semibold text-[#111B1F] dark:text-[#F8FAFC] block">
               Backup agendado
             </span>
-            <span className="text-[10px] text-[#657484] dark:text-[#8696A0]">
+            <span className="text-[11px] text-[#657484] dark:text-[#94A3B8]">
               🔔 Notificação semanal para salvar seus dados
             </span>
           </div>
@@ -540,7 +602,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
             type="button"
             onClick={handleToggleScheduledBackup}
             className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors ${
-              settings.scheduledBackupEnabled ? 'bg-[#01D65A]' : 'bg-[#657484]/40'
+              settings.scheduledBackupEnabled ? 'bg-[#001E62] dark:bg-[#2563EB]' : 'bg-[#657484]/40 dark:bg-slate-700'
             }`}
           >
             <div
@@ -556,16 +618,16 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
           <button
             type="button"
             onClick={handleExportBackup}
-            className="py-2.5 px-3 rounded-xl bg-[#01D65A] hover:bg-[#019444] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all"
+            className="py-2.5 px-3 rounded-xl bg-[#001E62] hover:bg-[#001545] dark:bg-[#1D4ED8] hover:dark:bg-[#2563EB] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all dark:border dark:border-[#60A5FA]/40"
           >
             <Download className="w-4 h-4" />
-            <span>Backup Manual</span>
+            <span>{t('settings.makeBackup')}</span>
           </button>
 
           <button
             type="button"
             onClick={handleShareBackup}
-            className="py-2.5 px-3 rounded-xl bg-[#E1FFD2] dark:bg-[#005C4B]/60 text-[#008069] dark:text-[#01D65A] hover:bg-[#01D65A] hover:text-white border border-[#01D65A]/30 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-95 transition-all"
+            className="py-2.5 px-3 rounded-xl bg-[#E8EEF8] dark:bg-[#172554] text-[#001E62] dark:text-[#93C5FD] hover:bg-[#001E62] hover:text-white hover:dark:bg-[#1E3A8A] border border-[#001E62]/30 dark:border-[#3B82F6]/50 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-95 transition-all"
           >
             <Share2 className="w-4 h-4" />
             <span>Compartilhar</span>
@@ -573,14 +635,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
         </div>
 
         {/* Restaurar Backup */}
-        <div className="pt-2 border-t border-[#E1E1E1] dark:border-[#2A3942]">
+        <div className="pt-2 border-t border-[#E1E1E1] dark:border-[#1F2E44]">
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="w-full py-2.5 px-3 rounded-xl bg-[#F0F2F5] dark:bg-[#111B26] hover:bg-slate-200 dark:hover:bg-slate-800 text-[#111B1F] dark:text-[#E9EDEF] border border-[#E1E1E1] dark:border-[#2A3942] text-xs font-semibold flex items-center justify-center gap-1.5 active:scale-95 transition-all"
+            className="w-full py-2.5 px-3 rounded-xl bg-[#F0F2F5] dark:bg-[#0B1320] hover:bg-slate-200 dark:hover:bg-[#162236] text-[#111B1F] dark:text-[#F8FAFC] border border-[#E1E1E1] dark:border-[#202E42] text-xs font-semibold flex items-center justify-center gap-1.5 active:scale-95 transition-all"
           >
             <Upload className="w-4 h-4" />
-            <span>Restaurar Backup... (.rsvpwa ou .json)</span>
+            <span>{t('settings.restoreBackup')} (.rsvpwa / .json)</span>
           </button>
 
           <input
@@ -593,63 +655,96 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
         </div>
 
         {backupSuccess && (
-          <div className="flex items-center justify-center gap-1.5 p-2 rounded-xl bg-[#E1FFD2] dark:bg-[#005C4B]/60 text-[#008069] dark:text-[#01D65A] text-xs font-semibold">
-            <Check className="w-4 h-4" />
+          <div className="flex items-center justify-center gap-1.5 p-2 rounded-xl bg-[#E8EEF8] dark:bg-[#172554] text-[#001E62] dark:text-[#93C5FD] text-xs font-semibold border border-[#001E62]/30 dark:border-[#3B82F6]/50">
+            <Check className="w-4 h-4 stroke-[3]" />
             <span>{backupSuccess}</span>
           </div>
         )}
       </section>
 
-      {/* 🔒 PRIVACIDADE — 100% LOCAL (Card estilo WhatsApp) */}
-      <section className="bg-[#E1FFD2]/40 dark:bg-[#005C4B]/20 rounded-xl p-4 border border-[#01D65A]/40 space-y-2">
-        <div className="flex items-center gap-2 text-[#008069] dark:text-[#01D65A]">
+      {/* 🗑️ BASE DE DADOS — LIMPAR DADOS */}
+      <section className="bg-white dark:bg-[#111A29] rounded-xl p-4 border border-[#E1E1E1] dark:border-[#1F2E44] shadow-sm space-y-3">
+        <div className="flex items-center gap-2 pb-2 border-b border-[#E1E1E1] dark:border-[#1F2E44]">
+          <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+          <h2 className="text-xs font-bold text-rose-600 dark:text-rose-400 tracking-wider uppercase">
+            {t('settings.databaseSection')}
+          </h2>
+        </div>
+
+        <p className="text-xs text-[#5C6B7E] dark:text-[#94A3B8] leading-relaxed">
+          {t('settings.databaseDesc')}
+        </p>
+
+        <button
+          type="button"
+          onClick={() => {
+            triggerHaptic(12);
+            setIsClearDbModalOpen(true);
+          }}
+          className="w-full py-2.5 px-4 rounded-xl border border-rose-500/40 bg-rose-500/10 hover:bg-rose-500/20 dark:border-rose-500/50 dark:bg-rose-950/30 dark:hover:bg-rose-900/40 text-rose-600 dark:text-rose-400 text-xs font-bold flex items-center justify-center gap-2 transition-colors active:scale-95"
+        >
+          <Trash2 className="w-4 h-4" />
+          <span>{t('settings.clearDbButton')}</span>
+        </button>
+
+        {clearDbSuccess && (
+          <div className="flex items-center justify-center gap-1.5 p-2 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 text-xs font-semibold border border-emerald-500/20">
+            <Check className="w-4 h-4 stroke-[3]" />
+            <span>{clearDbSuccess}</span>
+          </div>
+        )}
+      </section>
+
+      {/* 🔒 PRIVACIDADE — 100% LOCAL */}
+      <section className="bg-[#E8EEF8]/60 dark:bg-[#0E1A2D] rounded-xl p-4 border border-[#001E62]/20 dark:border-[#223B60] space-y-2">
+        <div className="flex items-center gap-2 text-[#001E62] dark:text-[#93C5FD]">
           <ShieldCheck className="w-5 h-5 shrink-0" />
           <h3 className="text-xs font-bold uppercase tracking-wider">
             🔒 PRIVACIDADE — 100% LOCAL
           </h3>
         </div>
 
-        <ul className="space-y-1 text-xs text-[#111B1F] dark:text-[#E9EDEF] leading-relaxed">
+        <ul className="space-y-1.5 text-xs text-[#111B1F] dark:text-[#E2E8F0] leading-relaxed">
           <li className="flex items-start gap-1.5">
-            <span className="text-[#01D65A] font-bold">🟢</span>
-            <span><strong>Armazenamento:</strong> IndexedDB (Dexie.js) — 100% no seu dispositivo.</span>
+            <span className="text-[#001E62] dark:text-[#60A5FA] font-bold">🟦</span>
+            <span><strong className="text-[#001E62] dark:text-white">Armazenamento:</strong> IndexedDB (Dexie.js) — 100% no seu dispositivo.</span>
           </li>
           <li className="flex items-start gap-1.5">
-            <span className="text-[#01D65A] font-bold">🟢</span>
-            <span><strong>Compartilhamento:</strong> Direto no aparelho via WhatsApp ou cópia.</span>
+            <span className="text-[#001E62] dark:text-[#60A5FA] font-bold">🟦</span>
+            <span><strong className="text-[#001E62] dark:text-white">Compartilhamento:</strong> Cópia de texto direta para a área de transferência.</span>
           </li>
           <li className="flex items-start gap-1.5">
-            <span className="text-[#01D65A] font-bold">🟢</span>
-            <span><strong>Backup:</strong> Arquivo <code>.rsvpwa</code> protegido e offline.</span>
+            <span className="text-[#001E62] dark:text-[#60A5FA] font-bold">🟦</span>
+            <span><strong className="text-[#001E62] dark:text-white">Backup:</strong> Arquivo <code>.rsvpwa</code> protegido e offline.</span>
           </li>
           <li className="flex items-start gap-1.5">
-            <span className="text-[#01D65A] font-bold">🟢</span>
-            <span><strong>Notificações:</strong> Service Worker local sem conexão externa.</span>
+            <span className="text-[#001E62] dark:text-[#60A5FA] font-bold">🟦</span>
+            <span><strong className="text-[#001E62] dark:text-white">Notificações:</strong> Service Worker local sem conexão externa.</span>
           </li>
           <li className="flex items-start gap-1.5">
-            <span className="text-red-500 font-bold">🔴</span>
-            <span><strong>Nenhuma chamada de rede externa:</strong> Zero servidores de dados.</span>
+            <span className="text-rose-500 font-bold">🔴</span>
+            <span><strong className="text-[#001E62] dark:text-white">Nenhuma chamada de rede externa:</strong> Zero servidores de dados.</span>
           </li>
           <li className="flex items-start gap-1.5">
-            <span className="text-red-500 font-bold">🔴</span>
-            <span><strong>Zero rastreamento:</strong> Sem Google Analytics, sem telemetria, sem cookies.</span>
+            <span className="text-rose-500 font-bold">🔴</span>
+            <span><strong className="text-[#001E62] dark:text-white">Zero rastreamento:</strong> Sem Google Analytics, sem telemetria, sem cookies.</span>
           </li>
         </ul>
       </section>
 
       {/* Modal de Alerta de Confirmação de Restauração */}
       {isRestoreModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white dark:bg-[#1F2C34] rounded-2xl w-full max-w-sm border border-red-500/40 p-4 shadow-2xl space-y-3 text-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-fade-in">
+          <div className="bg-white dark:bg-[#111A29] rounded-2xl w-full max-w-sm border border-red-500/40 dark:border-red-500/50 p-4 shadow-2xl space-y-3 text-center">
             <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mx-auto text-red-500">
               <AlertTriangle className="w-6 h-6" />
             </div>
 
             <div>
-              <h3 className="text-sm font-bold text-[#111B1F] dark:text-[#E9EDEF]">
+              <h3 className="text-sm font-bold text-[#111B1F] dark:text-[#F8FAFC]">
                 ⚠️ Restaurar sobrescreve TODOS os dados!
               </h3>
-              <p className="text-xs text-[#657484] dark:text-[#8696A0] mt-1 leading-relaxed">
+              <p className="text-xs text-[#5C6B7E] dark:text-[#94A3B8] mt-1 leading-relaxed">
                 A restauração substituirá todos os registros e revisitas atuais pelos dados contidos no arquivo selecionado.
               </p>
             </div>
@@ -661,9 +756,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
                   setIsRestoreModalOpen(false);
                   setPendingFileContent(null);
                 }}
-                className="flex-1 py-2 px-3 rounded-xl border border-[#657484]/30 text-xs font-semibold text-[#657484] dark:text-[#8696A0]"
+                className="flex-1 py-2 px-3 rounded-xl border border-[#657484]/30 dark:border-[#25364E] text-xs font-semibold text-[#657484] dark:text-[#CBD5E1]"
               >
-                Cancelar
+                {t('common.cancel')}
               </button>
               <button
                 type="button"
@@ -671,6 +766,50 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
                 className="flex-1 py-2 px-3 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold"
               >
                 Sim, restaurar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Confirmação para Limpar Base de Dados */}
+      {isClearDbModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-fade-in">
+          <div className="bg-white dark:bg-[#111A29] rounded-2xl w-full max-w-sm border border-rose-500/50 p-4 shadow-2xl space-y-3 text-center">
+            <div className="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto text-rose-600 dark:text-rose-400">
+              <AlertTriangle className="w-6 h-6" />
+            </div>
+
+            <div>
+              <h3 className="text-sm font-bold text-[#111B1F] dark:text-[#F8FAFC]">
+                {t('settings.clearDbModalTitle')}
+              </h3>
+              <p className="text-xs font-semibold text-rose-600 dark:text-rose-400 mt-1">
+                {t('settings.clearDbModalWarning')}
+              </p>
+              <p className="text-xs text-[#5C6B7E] dark:text-[#94A3B8] mt-1.5 leading-relaxed">
+                {t('settings.clearDbModalMessage')}
+              </p>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic(8);
+                  setIsClearDbModalOpen(false);
+                }}
+                className="flex-1 py-2.5 px-3 rounded-xl border border-[#657484]/30 dark:border-[#25364E] text-xs font-semibold text-[#657484] dark:text-[#CBD5E1] hover:bg-slate-100 dark:hover:bg-[#162236] transition-colors"
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmClearDb}
+                className="flex-1 py-2.5 px-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{t('settings.clearDbModalConfirm')}</span>
               </button>
             </div>
           </div>

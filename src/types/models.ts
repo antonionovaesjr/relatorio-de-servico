@@ -1,6 +1,7 @@
 export type UserRole = 'publisher' | 'auxiliary_pioneer' | 'regular_pioneer';
 export type AppTheme = 'system' | 'light' | 'dark';
 export type AppLanguage = 'pt-BR' | 'en-US' | 'es-ES';
+export type AppFontSize = 'small' | 'normal' | 'large' | 'xlarge';
 
 export interface RegularPioneerConfig {
   startMonthYear: string; // "YYYY-MM"
@@ -22,7 +23,8 @@ export interface UserSettings {
   auxiliaryPioneerConfig?: AuxiliaryPioneerConfig;
   theme: AppTheme;
   language: AppLanguage;
-  revisitNotificationDays: number; // 1, 2 ou 3 dias
+  fontSize?: AppFontSize;
+  revisitNotificationDays: number; // 1 a 7 dias
   scheduledBackupEnabled: boolean;
   updatedAt: string;
 }

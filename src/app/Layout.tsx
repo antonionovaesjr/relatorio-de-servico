@@ -3,6 +3,7 @@ import { WifiOff, Sun, Moon, Plus } from 'lucide-react';
 import { BottomNavBar, type TabType } from '../components/navigation/BottomNavBar';
 import { triggerHaptic } from '../utils/haptics';
 import type { AppTheme } from '../types/models';
+import { useTranslation } from '../i18n/I18nContext';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -21,6 +22,7 @@ export const Layout: React.FC<LayoutProps> = ({
   onToggleTheme,
   onOpenRegisterModal,
 }) => {
+  const { t } = useTranslation();
   const [isOffline, setIsOffline] = useState(() => (typeof navigator !== 'undefined' ? !navigator.onLine : false));
 
   useEffect(() => {
@@ -40,13 +42,13 @@ export const Layout: React.FC<LayoutProps> = ({
   const headerTitle = (() => {
     switch (currentTab) {
       case 'report':
-        return 'Relatórios';
+        return t('nav.reports');
       case 'settings':
-        return 'Configurações';
+        return t('nav.settings');
       case 'help':
-        return 'Ajuda';
+        return t('nav.help');
       default:
-        return 'Início';
+        return t('nav.home');
     }
   })();
 
@@ -54,28 +56,28 @@ export const Layout: React.FC<LayoutProps> = ({
   const isFabVisible = currentTab === 'home' || currentTab === 'report';
 
   return (
-    <div className="min-h-screen bg-[#F0F2F5] dark:bg-[#111B26] text-[#111B1F] dark:text-[#E9EDEF] flex flex-col antialiased transition-colors duration-200">
+    <div className="min-h-screen bg-[#F4F6F9] dark:bg-[#0A111E] text-[#0A111E] dark:text-[#F8FAFC] flex flex-col antialiased transition-colors duration-200">
       {/* ⚠️ Estado Offline: Banner discreto no topo */}
       {isOffline && (
         <aside aria-label="Aviso de conexão offline" className="bg-[#FFEECD] text-[#594408] text-xs font-semibold py-1.5 px-4 text-center flex items-center justify-center gap-1.5 shadow-sm border-b border-[#E8D19F]">
           <WifiOff className="w-3.5 h-3.5" />
-          <span>Offline — todos os dados salvos localmente</span>
+          <span>{t('common.offlineMsg')}</span>
         </aside>
       )}
 
-      {/* Header Superior Estilo WhatsApp */}
-      <header className="sticky top-0 z-30 bg-[#008069] dark:bg-[#1F2C34] text-white shadow-sm border-b border-[#006A57] dark:border-[#2A3942] transition-colors">
+      {/* Header Superior Midnight Blue */}
+      <header className="sticky top-0 z-30 bg-[#001E62] text-white shadow-md border-b border-[#001545] dark:border-[#1F2E44] transition-colors">
         <div className="max-w-md w-full mx-auto px-4 pt-[max(env(safe-area-inset-top),10px)] pb-3 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-[#01D65A] flex items-center justify-center text-[#111B26] shadow-sm font-extrabold text-xs tracking-wider">
+            <div className="w-8 h-8 rounded-full bg-white text-[#001E62] flex items-center justify-center shadow-sm font-extrabold text-xs tracking-wider">
               RS
             </div>
             <div>
               <h1 className="text-base font-bold tracking-tight text-white leading-tight">
                 {headerTitle}
               </h1>
-              <p className="text-[11px] text-[#A6E9CE] dark:text-[#8696A0] leading-none">
-                100% Local & Privado
+              <p className="text-[11px] text-[#CBD8EE] dark:text-[#93C5FD] leading-none">
+                {t('common.privateNotice')}
               </p>
             </div>
           </div>
@@ -87,12 +89,12 @@ export const Layout: React.FC<LayoutProps> = ({
               triggerHaptic(8);
               onToggleTheme();
             }}
-            className="p-2 rounded-full text-[#A6E9CE] hover:text-white dark:text-[#8696A0] dark:hover:text-[#E9EDEF] hover:bg-white/10 dark:hover:bg-white/5 transition-colors"
-            title="Alternar tema claro/escuro"
-            aria-label="Alternar tema claro/escuro"
+            className="p-2 rounded-full text-[#CBD8EE] hover:text-white hover:bg-white/10 transition-colors"
+            title={t('common.toggleTheme')}
+            aria-label={t('common.toggleTheme')}
           >
             {currentTheme === 'dark' ? (
-              <Sun className="w-5 h-5 text-[#01D65A]" />
+              <Sun className="w-5 h-5 text-amber-300" />
             ) : (
               <Moon className="w-5 h-5 text-white" />
             )}
@@ -105,18 +107,18 @@ export const Layout: React.FC<LayoutProps> = ({
         {children}
       </main>
 
-      {/* 🟢 FAB Flutuante (bottom-right) — Visível em Início e Relatórios */}
+      {/* 🟦 FAB Flutuante (bottom-right) — Visível em Início e Relatórios */}
       {isFabVisible && (
         <button
           onClick={() => {
             triggerHaptic(15);
             onOpenRegisterModal();
           }}
-          className={`fixed bottom-20 right-5 z-30 w-14 h-14 rounded-full bg-[#01D65A] hover:bg-[#019444] text-white shadow-lg flex items-center justify-center transition-all duration-200 active:scale-90 focus:outline-none focus:ring-4 focus:ring-[#01D65A]/30 ${
-            currentTab === 'report' ? 'ring-2 ring-emerald-400/50' : ''
+          className={`fixed bottom-20 right-5 z-30 w-14 h-14 rounded-full bg-[#001E62] hover:bg-[#001545] text-white dark:bg-[#1D4ED8] dark:hover:bg-[#2563EB] shadow-xl flex items-center justify-center transition-all duration-200 active:scale-90 focus:outline-none focus:ring-4 focus:ring-[#001E62]/30 dark:focus:ring-blue-500/40 ${
+            currentTab === 'report' ? 'ring-2 ring-blue-300/50' : ''
           }`}
-          title="Novo Registro Diário"
-          aria-label="Novo Registro Diário"
+          title={t('nav.newEntry')}
+          aria-label={t('nav.newEntry')}
         >
           <Plus className="w-7 h-7 stroke-[2.8]" />
         </button>

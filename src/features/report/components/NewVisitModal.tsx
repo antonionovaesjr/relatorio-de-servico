@@ -129,7 +129,7 @@ export const NewVisitModal: React.FC<NewVisitModalProps> = ({ isOpen, onClose, o
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
-      <div className="bg-white dark:bg-[#111A29] rounded-2xl w-full max-w-md border border-[#E9EDEF] dark:border-[#1F2E44] shadow-2xl overflow-hidden animate-fade-in max-h-[90vh] flex flex-col">
+      <div className="bg-white dark:bg-[#111A29] rounded-2xl w-full max-w-md border-2 border-[#001E62] dark:border-[#3B82F6] shadow-2xl overflow-hidden animate-fade-in max-h-[90vh] flex flex-col">
         {/* Cabeçalho do Modal Midnight Blue */}
         <div className="flex items-center justify-between p-4 border-b border-[#001545] dark:border-[#1F2E44] bg-[#001E62] text-white">
           <div className="flex items-center gap-2">

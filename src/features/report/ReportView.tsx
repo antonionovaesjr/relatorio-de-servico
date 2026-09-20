@@ -580,8 +580,8 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
       {/* Modal de Edição / Correção de Lançamento Diário */}
       {editingDailyEntry && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/70 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white dark:bg-[#111A29] rounded-2xl w-full max-w-md border border-[#E1E1E1] dark:border-[#1F2E44] p-4 shadow-2xl space-y-3.5 max-h-[92vh] overflow-y-auto">
-            <h3 className="text-sm font-bold text-[#001E62] dark:text-[#93C5FD] border-b border-[#E1E1E1] dark:border-[#1F2E44] pb-2 flex items-center justify-between">
+          <div className="bg-white dark:bg-[#111A29] rounded-2xl w-full max-w-md border-2 border-[#001E62] dark:border-[#3B82F6] p-4 shadow-2xl space-y-3.5 max-h-[92vh] overflow-y-auto">
+            <h3 className="text-sm font-bold text-[#001E62] dark:text-[#93C5FD] border-b border-[#001E62]/20 dark:border-[#3B82F6]/30 pb-2 flex items-center justify-between">
               <span>{t('reports.editDailyTitle')}</span>
               <span className="text-[11px] font-normal text-[#5C6B7E] dark:text-[#94A3B8]">
                 ID: #{editingDailyEntry.id}

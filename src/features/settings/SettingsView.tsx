@@ -813,7 +813,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
       {/* Modal de Alerta de Confirmação de Restauração */}
       {isRestoreModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white dark:bg-[#111A29] rounded-2xl w-full max-w-sm border border-red-500/40 dark:border-red-500/50 p-4 shadow-2xl space-y-3 text-center">
+          <div className="bg-white dark:bg-[#111A29] rounded-2xl w-full max-w-sm border-2 border-[#001E62] dark:border-[#3B82F6] p-4 shadow-2xl space-y-3 text-center">
             <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mx-auto text-red-500">
               <AlertTriangle className="w-6 h-6" />
             </div>
@@ -853,7 +853,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
       {/* Modal de Confirmação para Limpar Base de Dados */}
       {isClearDbModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white dark:bg-[#111A29] rounded-2xl w-full max-w-sm border border-rose-500/50 p-4 shadow-2xl space-y-3 text-center">
+          <div className="bg-white dark:bg-[#111A29] rounded-2xl w-full max-w-sm border-2 border-[#001E62] dark:border-[#3B82F6] p-4 shadow-2xl space-y-3 text-center">
             <div className="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto text-rose-600 dark:text-rose-400">
               <AlertTriangle className="w-6 h-6" />
             </div>

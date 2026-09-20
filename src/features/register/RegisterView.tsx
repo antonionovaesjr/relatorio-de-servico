@@ -396,7 +396,7 @@ export const RegisterView: React.FC = () => {
       </section>
 
       {/* 👤 SEÇÃO RECOLHÍVEL: NOVA REVISITA */}
-      <section className="bg-white dark:bg-[#111A29] rounded-xl p-4 shadow-sm border border-[#E9EDEF] dark:border-[#1F2E44]">
+      <section className="bg-white dark:bg-[#111A29] rounded-xl p-4 shadow-sm border border-[#001E62]/30 dark:border-[#3B82F6]/40">
         <button
           type="button"
           onClick={() => {
@@ -418,7 +418,7 @@ export const RegisterView: React.FC = () => {
         </button>
 
         {isRevisitOpen && (
-          <form onSubmit={handleSaveRevisit} className="space-y-3.5 pt-4 border-t border-[#E9EDEF] dark:border-[#1F2E44] mt-3 animate-fade-in">
+          <form onSubmit={handleSaveRevisit} className="space-y-3.5 pt-4 border-t border-[#001E62]/20 dark:border-[#3B82F6]/30 mt-3 animate-fade-in">
             {visitSaveSuccess && (
               <div className="flex items-center gap-1.5 text-xs text-emerald-700 dark:text-emerald-300 font-semibold bg-emerald-500/10 p-2 rounded-lg">
                 <CheckCircle2 className="w-4 h-4" />

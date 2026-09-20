@@ -167,7 +167,7 @@ export const DailyEntryModal: React.FC<DailyEntryModalProps> = ({
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/70 backdrop-blur-xs animate-fade-in">
-        <div className="bg-white dark:bg-[#111A29] rounded-2xl w-full max-w-md border border-[#E1E1E1] dark:border-[#1F2E44] shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+        <div className="bg-white dark:bg-[#111A29] rounded-2xl w-full max-w-md border-2 border-[#001E62] dark:border-[#3B82F6] shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
           {/* 🟦 Cabeçalho Midnight Blue (#001E62) — altura 56px */}
           <header className="h-14 bg-[#001E62] dark:bg-[#0C1527] text-white px-4 flex items-center justify-between shrink-0 shadow-sm border-b dark:border-[#1E2D48]">
             <button

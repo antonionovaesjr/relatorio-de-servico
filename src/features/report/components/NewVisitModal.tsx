@@ -4,6 +4,7 @@ import { X, User, Check, MapPin, Navigation, Loader2, Clock } from 'lucide-react
 import { triggerHaptic } from '../../../utils/haptics';
 import { todayDateString, suggestVisitTime } from '../../../utils/date';
 import { getCurrentCoordinates, reverseGeocode, getGoogleMapsUrl, getGeolocationErrorMessage } from '../../../utils/geolocation';
+import { ModalPortal } from '../../../components/common/ModalPortal';
 
 interface NewVisitModalProps {
   isOpen: boolean;
@@ -128,10 +129,11 @@ export const NewVisitModal: React.FC<NewVisitModalProps> = ({ isOpen, onClose, o
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
-      <div className="bg-white dark:bg-[#111A29] rounded-2xl w-full max-w-md border-2 border-[#001E62] dark:border-[#3B82F6] shadow-2xl overflow-hidden animate-fade-in max-h-[90vh] flex flex-col">
-        {/* Cabeçalho do Modal Midnight Blue */}
-        <div className="flex items-center justify-between p-4 border-b border-[#001545] dark:border-[#1F2E44] bg-[#001E62] text-white">
+    <ModalPortal isOpen={isOpen}>
+      <div className="fixed inset-0 z-[110] w-screen h-[100dvh] flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-xs animate-modal-backdrop overflow-y-auto">
+        <div className="bg-white dark:bg-[#111A29] rounded-2xl w-full max-w-md border-2 border-[#001E62] dark:border-[#3B82F6] shadow-2xl overflow-hidden flex flex-col max-h-[90dvh] my-auto animate-modal-card">
+          {/* Cabeçalho do Modal Midnight Blue */}
+          <div className="flex items-center justify-between p-4 border-b border-[#001545] dark:border-[#1F2E44] bg-[#001E62] text-white">
           <div className="flex items-center gap-2">
             <User className="w-5 h-5 text-white/90" />
             <h3 className="text-sm font-bold tracking-tight">
@@ -378,7 +380,8 @@ export const NewVisitModal: React.FC<NewVisitModalProps> = ({ isOpen, onClose, o
             </button>
           </div>
         </form>
+        </div>
       </div>
-    </div>
+    </ModalPortal>
   );
 };

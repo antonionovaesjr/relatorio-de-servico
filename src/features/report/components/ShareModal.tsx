@@ -3,6 +3,7 @@ import { X, Check, Copy, ClipboardCheck } from 'lucide-react';
 import { triggerHaptic } from '../../../utils/haptics';
 import { formatMonthLabel } from '../../../utils/date';
 import { useTranslation } from '../../../i18n/I18nContext';
+import { ModalPortal } from '../../../components/common/ModalPortal';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -140,10 +141,11 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/60 backdrop-blur-xs animate-fade-in">
-      <div className="bg-white dark:bg-[#111A29] rounded-2xl w-full max-w-md border-2 border-[#001E62] dark:border-[#3B82F6] shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
-        {/* Cabeçalho Midnight Blue (#001E62) */}
-        <header className="h-14 bg-[#001E62] text-white px-4 flex items-center justify-between shrink-0 shadow-sm">
+    <ModalPortal isOpen={isOpen}>
+      <div className="fixed inset-0 z-[110] w-screen h-[100dvh] flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-xs animate-modal-backdrop overflow-y-auto">
+        <div className="bg-white dark:bg-[#111A29] rounded-2xl w-full max-w-md border-2 border-[#001E62] dark:border-[#3B82F6] shadow-2xl overflow-hidden flex flex-col max-h-[90dvh] my-auto animate-modal-card">
+          {/* Cabeçalho Midnight Blue (#001E62) */}
+          <header className="h-14 bg-[#001E62] text-white px-4 flex items-center justify-between shrink-0 shadow-sm">
           <div className="flex items-center gap-2">
             <ClipboardCheck className="w-5 h-5 text-white/90" />
             <h3 className="text-sm font-bold tracking-tight">
@@ -254,9 +256,10 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             >
               {t('common.close')}
             </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </ModalPortal>
   );
 };

@@ -5,6 +5,7 @@ import { todayDateString, deriveMonthKeyFromDate, suggestVisitTime } from '../..
 import { triggerHaptic } from '../../utils/haptics';
 import { useTranslation } from '../../i18n/I18nContext';
 import { getCurrentCoordinates, reverseGeocode, getGoogleMapsUrl, getGeolocationErrorMessage } from '../../utils/geolocation';
+import { ModalPortal } from '../../components/common/ModalPortal';
 
 interface RevisitModalProps {
   isOpen: boolean;
@@ -112,10 +113,11 @@ export const RevisitModal: React.FC<RevisitModalProps> = ({ isOpen, onClose, onS
   };
 
   return (
-    <div className="fixed inset-0 z-60 flex items-center justify-center p-3 bg-black/65 backdrop-blur-xs animate-fade-in">
-      <div className="bg-white dark:bg-[#111A29] rounded-2xl w-full max-w-md border-2 border-[#001E62] dark:border-[#3B82F6] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        {/* 🟦 Cabeçalho Midnight Blue (#001E62) — altura 56px */}
-        <header className="h-14 bg-[#001E62] text-white px-4 flex items-center justify-between shrink-0 shadow-sm">
+    <ModalPortal isOpen={isOpen}>
+      <div className="fixed inset-0 z-[110] w-screen h-[100dvh] flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-xs animate-modal-backdrop overflow-y-auto">
+        <div className="bg-white dark:bg-[#111A29] rounded-2xl w-full max-w-md border-2 border-[#001E62] dark:border-[#3B82F6] shadow-2xl overflow-hidden flex flex-col max-h-[90dvh] my-auto animate-modal-card">
+          {/* 🟦 Cabeçalho Midnight Blue (#001E62) — altura 56px */}
+          <header className="h-14 bg-[#001E62] text-white px-4 flex items-center justify-between shrink-0 shadow-sm">
           <button
             type="button"
             onClick={() => {
@@ -361,7 +363,8 @@ export const RevisitModal: React.FC<RevisitModalProps> = ({ isOpen, onClose, onS
             </button>
           </div>
         </form>
+        </div>
       </div>
-    </div>
+    </ModalPortal>
   );
 };

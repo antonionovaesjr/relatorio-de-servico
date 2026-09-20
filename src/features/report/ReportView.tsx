@@ -30,6 +30,7 @@ import { useTranslation } from '../../i18n/I18nContext';
 import { ShareModal } from './components/ShareModal';
 import { RevisitModal } from '../register/RevisitModal';
 import { formatFullAddress, getGoogleMapsUrl } from '../../utils/geolocation';
+import { ModalPortal } from '../../components/common/ModalPortal';
 
 interface ReportViewProps {
   initialMonthKey?: string;
@@ -578,147 +579,149 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
       />
 
       {/* Modal de Edição / Correção de Lançamento Diário */}
-      {editingDailyEntry && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/70 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white dark:bg-[#111A29] rounded-2xl w-full max-w-md border-2 border-[#001E62] dark:border-[#3B82F6] p-4 shadow-2xl space-y-3.5 max-h-[92vh] overflow-y-auto">
-            <h3 className="text-sm font-bold text-[#001E62] dark:text-[#93C5FD] border-b border-[#001E62]/20 dark:border-[#3B82F6]/30 pb-2 flex items-center justify-between">
-              <span>{t('reports.editDailyTitle')}</span>
-              <span className="text-[11px] font-normal text-[#5C6B7E] dark:text-[#94A3B8]">
-                ID: #{editingDailyEntry.id}
-              </span>
-            </h3>
+      <ModalPortal isOpen={!!editingDailyEntry}>
+        {editingDailyEntry && (
+          <div className="fixed inset-0 z-[110] w-screen h-[100dvh] flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-xs animate-modal-backdrop overflow-y-auto">
+            <div className="bg-white dark:bg-[#111A29] rounded-2xl w-full max-w-md border-2 border-[#001E62] dark:border-[#3B82F6] p-4 shadow-2xl space-y-3.5 max-h-[90dvh] overflow-y-auto my-auto animate-modal-card">
+              <h3 className="text-sm font-bold text-[#001E62] dark:text-[#93C5FD] border-b border-[#001E62]/20 dark:border-[#3B82F6]/30 pb-2 flex items-center justify-between">
+                <span>{t('reports.editDailyTitle')}</span>
+                <span className="text-[11px] font-normal text-[#5C6B7E] dark:text-[#94A3B8]">
+                  ID: #{editingDailyEntry.id}
+                </span>
+              </h3>
 
-            <form onSubmit={handleSaveEditDaily} className="space-y-3">
-              <div>
-                <label className="block text-xs font-semibold text-[#5C6B7E] dark:text-[#CBD5E1] mb-1">
-                  {t('reports.dateLabel')}
-                </label>
-                <input
-                  type="date"
-                  required
-                  value={editDate}
-                  onChange={(e) => setEditDate(e.target.value)}
-                  className="w-full bg-[#F0F2F5] dark:bg-[#0B1320] text-[#111B1F] dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E1E1E1] dark:border-[#25364E] text-xs focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:border-[#60A5FA]"
-                />
-              </div>
-
-              {/* Seletor e Correção de Horas */}
-              <div className="space-y-2 bg-[#F0F2F5] dark:bg-[#0B1320] p-3 rounded-xl border border-[#E1E1E1] dark:border-[#202E42]">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-[#111B1F] dark:text-[#CBD5E1]">
-                    ⏰ {t('reports.timeHours')}
+              <form onSubmit={handleSaveEditDaily} className="space-y-3">
+                <div>
+                  <label className="block text-xs font-semibold text-[#5C6B7E] dark:text-[#CBD5E1] mb-1">
+                    {t('reports.dateLabel')}
                   </label>
+                  <input
+                    type="date"
+                    required
+                    value={editDate}
+                    onChange={(e) => setEditDate(e.target.value)}
+                    className="w-full bg-[#F0F2F5] dark:bg-[#0B1320] text-[#111B1F] dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E1E1E1] dark:border-[#25364E] text-xs focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:border-[#60A5FA]"
+                  />
+                </div>
+
+                {/* Seletor e Correção de Horas */}
+                <div className="space-y-2 bg-[#F0F2F5] dark:bg-[#0B1320] p-3 rounded-xl border border-[#E1E1E1] dark:border-[#202E42]">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-[#111B1F] dark:text-[#CBD5E1]">
+                      ⏰ {t('reports.timeHours')}
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handleResetEditTime}
+                      className="text-[10px] font-bold text-rose-600 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-900"
+                    >
+                      ↺ {t('common.reset')}
+                    </button>
+                  </div>
+
+                  <input
+                    type="text"
+                    required
+                    value={editTimeStr}
+                    onChange={(e) => setEditTimeStr(e.target.value)}
+                    placeholder="00:00"
+                    className="w-full bg-white dark:bg-[#111A29] font-mono text-center text-xl font-bold text-[#001E62] dark:text-[#60A5FA] px-3 py-2 rounded-xl border border-[#001E62]/30 dark:border-[#3B82F6]/50 focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:border-[#60A5FA]"
+                  />
+
+                  {/* Correção de Lançamento: Reduzir / Diminuir tempo */}
+                  <div>
+                    <div className="text-[10px] uppercase font-bold tracking-wider text-rose-700 dark:text-rose-400 mb-1">
+                      {t('reports.correctDecrease')}
+                    </div>
+                    <div className="grid grid-cols-4 gap-1">
+                      {[
+                        { label: '-1h', val: -60 },
+                        { label: '-30m', val: -30 },
+                        { label: '-15m', val: -15 },
+                        { label: '-5m', val: -5 },
+                      ].map((btn) => (
+                        <button
+                          key={btn.label}
+                          type="button"
+                          onClick={() => handleAdjustEditMinutes(btn.val)}
+                          className="py-1 text-[11px] font-bold rounded-lg bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200 dark:border-rose-900 active:scale-95 text-center transition-colors"
+                        >
+                          {btn.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Adicionar tempo */}
+                  <div>
+                    <div className="text-[10px] uppercase font-bold tracking-wider text-[#001E62] dark:text-[#93C5FD] mb-1">
+                      {t('reports.addTime')}
+                    </div>
+                    <div className="grid grid-cols-4 gap-1">
+                      {[
+                        { label: '+5m', val: 5 },
+                        { label: '+15m', val: 15 },
+                        { label: '+30m', val: 30 },
+                        { label: '+1h', val: 60 },
+                      ].map((btn) => (
+                        <button
+                          key={btn.label}
+                          type="button"
+                          onClick={() => handleAdjustEditMinutes(btn.val)}
+                          className="py-1 text-[11px] font-bold rounded-lg bg-[#E8EEF8] dark:bg-[#172554] text-[#001E62] dark:text-[#93C5FD] hover:bg-[#001E62] hover:text-white dark:hover:bg-[#1E3A8A] transition-colors border border-[#001E62]/20 dark:border-[#3B82F6]/40 active:scale-95 text-center"
+                        >
+                          {btn.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[#5C6B7E] dark:text-[#CBD5E1] mb-1">
+                    {t('dailyEntry.bibleStudies')}
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={editStudies}
+                    onChange={(e) => setEditStudies(parseInt(e.target.value, 10) || 0)}
+                    className="w-full bg-[#F0F2F5] dark:bg-[#0B1320] text-[#111B1F] dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E1E1E1] dark:border-[#25364E] text-xs focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:border-[#60A5FA]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[#5C6B7E] dark:text-[#CBD5E1] mb-1">
+                    {t('reports.notesLabel')}
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={editNotes}
+                    onChange={(e) => setEditNotes(e.target.value)}
+                    className="w-full bg-[#F0F2F5] dark:bg-[#0B1320] text-[#111B1F] dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E1E1E1] dark:border-[#25364E] text-xs resize-none focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:border-[#60A5FA]"
+                  />
+                </div>
+
+                <div className="flex gap-2 pt-2">
                   <button
                     type="button"
-                    onClick={handleResetEditTime}
-                    className="text-[10px] font-bold text-rose-600 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-900"
+                    onClick={() => setEditingDailyEntry(null)}
+                    className="flex-1 py-2.5 px-3 rounded-xl border border-[#657484]/30 dark:border-[#25364E] text-xs font-semibold text-[#5C6B7E] dark:text-[#CBD5E1] hover:bg-slate-100 dark:hover:bg-[#162236] transition-colors"
                   >
-                    ↺ {t('common.reset')}
+                    {t('common.cancel')}
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 py-2.5 px-3 rounded-xl bg-[#001E62] hover:bg-[#001545] dark:bg-[#1D4ED8] hover:dark:bg-[#2563EB] text-white text-xs font-bold transition-colors active:scale-95 dark:border dark:border-[#60A5FA]/40"
+                  >
+                    {t('reports.saveCorrection')}
                   </button>
                 </div>
-
-                <input
-                  type="text"
-                  required
-                  value={editTimeStr}
-                  onChange={(e) => setEditTimeStr(e.target.value)}
-                  placeholder="00:00"
-                  className="w-full bg-white dark:bg-[#111A29] font-mono text-center text-xl font-bold text-[#001E62] dark:text-[#60A5FA] px-3 py-2 rounded-xl border border-[#001E62]/30 dark:border-[#3B82F6]/50 focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:border-[#60A5FA]"
-                />
-
-                {/* Correção de Lançamento: Reduzir / Diminuir tempo */}
-                <div>
-                  <div className="text-[10px] uppercase font-bold tracking-wider text-rose-700 dark:text-rose-400 mb-1">
-                    {t('reports.correctDecrease')}
-                  </div>
-                  <div className="grid grid-cols-4 gap-1">
-                    {[
-                      { label: '-1h', val: -60 },
-                      { label: '-30m', val: -30 },
-                      { label: '-15m', val: -15 },
-                      { label: '-5m', val: -5 },
-                    ].map((btn) => (
-                      <button
-                        key={btn.label}
-                        type="button"
-                        onClick={() => handleAdjustEditMinutes(btn.val)}
-                        className="py-1 text-[11px] font-bold rounded-lg bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200 dark:border-rose-900 active:scale-95 text-center transition-colors"
-                      >
-                        {btn.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Adicionar tempo */}
-                <div>
-                  <div className="text-[10px] uppercase font-bold tracking-wider text-[#001E62] dark:text-[#93C5FD] mb-1">
-                    {t('reports.addTime')}
-                  </div>
-                  <div className="grid grid-cols-4 gap-1">
-                    {[
-                      { label: '+5m', val: 5 },
-                      { label: '+15m', val: 15 },
-                      { label: '+30m', val: 30 },
-                      { label: '+1h', val: 60 },
-                    ].map((btn) => (
-                      <button
-                        key={btn.label}
-                        type="button"
-                        onClick={() => handleAdjustEditMinutes(btn.val)}
-                        className="py-1 text-[11px] font-bold rounded-lg bg-[#E8EEF8] dark:bg-[#172554] text-[#001E62] dark:text-[#93C5FD] hover:bg-[#001E62] hover:text-white dark:hover:bg-[#1E3A8A] transition-colors border border-[#001E62]/20 dark:border-[#3B82F6]/40 active:scale-95 text-center"
-                      >
-                        {btn.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-[#5C6B7E] dark:text-[#CBD5E1] mb-1">
-                  {t('dailyEntry.bibleStudies')}
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={editStudies}
-                  onChange={(e) => setEditStudies(parseInt(e.target.value, 10) || 0)}
-                  className="w-full bg-[#F0F2F5] dark:bg-[#0B1320] text-[#111B1F] dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E1E1E1] dark:border-[#25364E] text-xs focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:border-[#60A5FA]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-[#5C6B7E] dark:text-[#CBD5E1] mb-1">
-                  {t('reports.notesLabel')}
-                </label>
-                <textarea
-                  rows={2}
-                  value={editNotes}
-                  onChange={(e) => setEditNotes(e.target.value)}
-                  className="w-full bg-[#F0F2F5] dark:bg-[#0B1320] text-[#111B1F] dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E1E1E1] dark:border-[#25364E] text-xs resize-none focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:border-[#60A5FA]"
-                />
-              </div>
-
-              <div className="flex gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setEditingDailyEntry(null)}
-                  className="flex-1 py-2.5 px-3 rounded-xl border border-[#657484]/30 dark:border-[#25364E] text-xs font-semibold text-[#5C6B7E] dark:text-[#CBD5E1] hover:bg-slate-100 dark:hover:bg-[#162236] transition-colors"
-                >
-                  {t('common.cancel')}
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 py-2.5 px-3 rounded-xl bg-[#001E62] hover:bg-[#001545] dark:bg-[#1D4ED8] hover:dark:bg-[#2563EB] text-white text-xs font-bold transition-colors active:scale-95 dark:border dark:border-[#60A5FA]/40"
-                >
-                  {t('reports.saveCorrection')}
-                </button>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </ModalPortal>
     </div>
   );
 };

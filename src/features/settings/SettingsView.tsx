@@ -31,6 +31,7 @@ import { triggerHaptic } from '../../utils/haptics';
 import { useTranslation } from '../../i18n/I18nContext';
 import { requestNotificationPermission } from '../../utils/notifications';
 import { usePWAInstall } from '../../utils/usePWAInstall';
+import { ModalPortal } from '../../components/common/ModalPortal';
 
 interface SettingsViewProps {
   currentTheme: AppTheme;
@@ -811,9 +812,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
       </section>
 
       {/* Modal de Alerta de Confirmação de Restauração */}
-      {isRestoreModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white dark:bg-[#111A29] rounded-2xl w-full max-w-sm border-2 border-[#001E62] dark:border-[#3B82F6] p-4 shadow-2xl space-y-3 text-center">
+      <ModalPortal isOpen={isRestoreModalOpen}>
+        <div className="fixed inset-0 z-[110] w-screen h-[100dvh] flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-modal-backdrop overflow-y-auto">
+          <div className="bg-white dark:bg-[#111A29] rounded-2xl w-full max-w-sm border-2 border-[#001E62] dark:border-[#3B82F6] p-5 shadow-2xl space-y-3.5 text-center my-auto animate-modal-card">
             <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mx-auto text-red-500">
               <AlertTriangle className="w-6 h-6" />
             </div>
@@ -822,7 +823,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
               <h3 className="text-sm font-bold text-[#111B1F] dark:text-[#F8FAFC]">
                 ⚠️ Restaurar sobrescreve TODOS os dados!
               </h3>
-              <p className="text-xs text-[#5C6B7E] dark:text-[#94A3B8] mt-1 leading-relaxed">
+              <p className="text-xs text-[#5C6B7E] dark:text-[#94A3B8] mt-1.5 leading-relaxed">
                 A restauração substituirá todos os registros e revisitas atuais pelos dados contidos no arquivo selecionado.
               </p>
             </div>
@@ -848,12 +849,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
             </div>
           </div>
         </div>
-      )}
+      </ModalPortal>
 
       {/* Modal de Confirmação para Limpar Base de Dados */}
-      {isClearDbModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white dark:bg-[#111A29] rounded-2xl w-full max-w-sm border-2 border-[#001E62] dark:border-[#3B82F6] p-4 shadow-2xl space-y-3 text-center">
+      <ModalPortal isOpen={isClearDbModalOpen}>
+        <div className="fixed inset-0 z-[110] w-screen h-[100dvh] flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-modal-backdrop overflow-y-auto">
+          <div className="bg-white dark:bg-[#111A29] rounded-2xl w-full max-w-sm border-2 border-[#001E62] dark:border-[#3B82F6] p-5 shadow-2xl space-y-3.5 text-center my-auto animate-modal-card">
             <div className="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto text-rose-600 dark:text-rose-400">
               <AlertTriangle className="w-6 h-6" />
             </div>
@@ -892,7 +893,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
             </div>
           </div>
         </div>
-      )}
+      </ModalPortal>
     </div>
   );
 };

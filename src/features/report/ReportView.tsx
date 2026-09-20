@@ -28,6 +28,7 @@ import { triggerHaptic } from '../../utils/haptics';
 import { useTranslation } from '../../i18n/I18nContext';
 import { ShareModal } from './components/ShareModal';
 import { RevisitModal } from '../register/RevisitModal';
+import { formatFullAddress, getGoogleMapsUrl } from '../../utils/geolocation';
 
 interface ReportViewProps {
   initialMonthKey?: string;
@@ -134,6 +135,9 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
       (v) =>
         v.contactName.toLowerCase().includes(q) ||
         (v.address && v.address.toLowerCase().includes(q)) ||
+        (v.city && v.city.toLowerCase().includes(q)) ||
+        (v.number && v.number.toLowerCase().includes(q)) ||
+        (v.complement && v.complement.toLowerCase().includes(q)) ||
         (v.notes && v.notes.toLowerCase().includes(q))
     );
   }, [returnVisits, searchQuery]);
@@ -211,11 +215,9 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
   };
 
   // Abrir Google Maps
-  const handleOpenMaps = (addr?: string) => {
-    if (!addr) return;
+  const handleOpenMaps = (visit: ReturnVisit) => {
     triggerHaptic(8);
-    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
+    window.open(getGoogleMapsUrl(visit), '_blank', 'noopener,noreferrer');
   };
 
   // Alternar Status da Revisita
@@ -488,9 +490,9 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
                         • {visit.contactName}
                       </h4>
 
-                      {visit.address && (
+                      {formatFullAddress(visit) && (
                         <p className="text-[11px] text-[#5C6B7E] dark:text-[#94A3B8] mt-0.5">
-                          📍 {visit.address}
+                          📍 {formatFullAddress(visit)}
                         </p>
                       )}
 
@@ -503,10 +505,10 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
                   </div>
 
                   <div className="flex items-center gap-1.5 shrink-0">
-                    {visit.address && (
+                    {(formatFullAddress(visit) || visit.latitude) && (
                       <button
                         type="button"
-                        onClick={() => handleOpenMaps(visit.address)}
+                        onClick={() => handleOpenMaps(visit)}
                         title={t('home.openMaps')}
                         className="p-1.5 rounded-lg bg-[#E8EEF8] dark:bg-[#172554] text-[#001E62] dark:text-[#93C5FD] hover:bg-[#001E62] hover:text-white dark:hover:bg-[#1E3A8A] transition-colors border border-[#001E62]/20 dark:border-[#3B82F6]/40"
                       >

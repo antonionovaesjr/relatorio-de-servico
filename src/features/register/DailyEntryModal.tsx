@@ -215,28 +215,30 @@ export const DailyEntryModal: React.FC<DailyEntryModalProps> = ({
             </div>
 
             {/* 📝 Estudos bíblicos */}
-            <div className="bg-[#F0F2F5] dark:bg-[#0B1320] p-3 rounded-xl border border-[#E1E1E1] dark:border-[#202E42]">
+            <div className="bg-[#F0F2F5] dark:bg-[#0B1320] p-3 rounded-xl border border-[#E1E1E1] dark:border-[#202E42] overflow-hidden">
               <label className="flex items-center gap-1.5 text-xs font-bold text-[#111B1F] dark:text-[#CBD5E1] mb-1.5">
                 <BookOpen className="w-3.5 h-3.5 text-[#001E62] dark:text-[#60A5FA]" />
                 <span>📝 {t('dailyEntry.bibleStudies')}</span>
               </label>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center justify-between gap-2.5 w-full">
                 <button
                   type="button"
                   onClick={() => {
                     triggerHaptic(5);
                     setStudies((p) => Math.max(0, p - 1));
                   }}
-                  className="w-9 h-9 rounded-lg bg-white dark:bg-[#111A29] text-[#111B1F] dark:text-[#F8FAFC] font-bold text-lg flex items-center justify-center border border-[#E1E1E1] dark:border-[#25364E] active:scale-95"
+                  className="shrink-0 w-10 h-10 rounded-xl bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold text-xl flex items-center justify-center shadow-xs active:scale-95 transition-all"
+                  aria-label="Diminuir estudos"
                 >
                   -
                 </button>
                 <input
                   type="number"
+                  inputMode="numeric"
                   min="0"
                   value={studies}
                   onChange={(e) => setStudies(Math.max(0, parseInt(e.target.value, 10) || 0))}
-                  className="flex-1 bg-white dark:bg-[#111A29] text-center font-bold text-base text-[#111B1F] dark:text-[#F8FAFC] py-1.5 rounded-lg border border-[#E1E1E1] dark:border-[#25364E] focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:border-[#60A5FA]"
+                  className="min-w-0 flex-1 bg-white dark:bg-[#111A29] text-center font-bold text-lg text-[#111B1F] dark:text-[#F8FAFC] h-10 py-1 rounded-xl border border-[#E1E1E1] dark:border-[#25364E] focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#60A5FA] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
                 <button
                   type="button"
@@ -244,7 +246,8 @@ export const DailyEntryModal: React.FC<DailyEntryModalProps> = ({
                     triggerHaptic(5);
                     setStudies((p) => p + 1);
                   }}
-                  className="w-9 h-9 rounded-lg bg-[#001E62] dark:bg-[#1D4ED8] hover:dark:bg-[#2563EB] text-white font-bold text-lg flex items-center justify-center shadow-xs active:scale-95 hover:bg-[#001545]"
+                  className="shrink-0 w-10 h-10 rounded-xl bg-[#001E62] dark:bg-[#1D4ED8] hover:bg-[#001545] dark:hover:bg-[#2563EB] text-white font-bold text-xl flex items-center justify-center shadow-xs active:scale-95 transition-all"
+                  aria-label="Aumentar estudos"
                 >
                   +
                 </button>

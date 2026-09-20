@@ -25,6 +25,7 @@ export interface UserSettings {
   language: AppLanguage;
   fontSize?: AppFontSize;
   revisitNotificationDays: number; // 1 a 7 dias
+  remindReportEndOfMonth?: boolean; // Lembrar no final do mês
   scheduledBackupEnabled: boolean;
   updatedAt: string;
 }
@@ -60,7 +61,12 @@ export interface ReturnVisit {
   id?: number; // Auto-increment PK
   monthKey: string; // Index: "YYYY-MM"
   contactName: string;
-  address?: string; // Endereço para abrir no Google Maps [ 🗺️ ]
+  address?: string; // Rua / Logradouro para abrir no Google Maps [ 🗺️ ]
+  number?: string; // Número predial / residencial
+  complement?: string; // Complemento (ex: Apto 102, Bloco B, Fundos)
+  city?: string; // Cidade identificada via GPS ou digitada
+  latitude?: number; // Latitude GPS
+  longitude?: number; // Longitude GPS
   topic?: string; // Assunto abordado
   lastVisitDate?: string; // Última visita "YYYY-MM-DD"
   publication?: string; // Publicação deixada

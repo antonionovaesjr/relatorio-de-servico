@@ -1,0 +1,47 @@
+O aplicativo precisa permitir lançamento de horas, estudo de modo diário, a data deve ser definida pelo usuário 
+
+Gere um prompt com spec driven development pt-br + vibeconding para desolvimento de uma aplicação PWA a ser executada em um Android e/ou Iphone. Todos os dados devem ser armazenado, localmente e não deve enviar dados para fora do dispositivo. Instrução de como fazer build ou publicação
+
+Novo protótipo com Use o tema do WhatsApp, descreva icones e dashboard modernos usados por ele:
+
+Aba: 
+ - Início
+    - Resumo dos relatórios do ano de serviço
+    - Se pioneiro regular, calcular quantas horas falta para concluir a designação
+ 
+ - Relatórios
+   - Relatórios anteriores consolidados (permitir compartilhar e disponibilizar campo neste mês: pioneiro auxiliar sim/não e campo checkbox de 50% (mês especial) )
+   - Revista a ser feita (ao lado do endereço um botão para abrir no google maps a localização)
+   - Checkbox mês como pioneiro auxiliar (exiba se for publicador nas configurações)
+   - Se Pioneiro auxiliar, checkbox para determinar se é um mês com possibilidade de fazer 50% requerida naquele mês
+   	- Registro
+   		 - Aplicativo precisa permitir lançamento de horas, estudo de modo diário, a data deve ser definida pelo usuário  - não é compartilhável, somente o meses consolidados
+     		- Campos do relatório 
+			1.  **Dia/Mês/Ano:** (gerado pelo app)
+			2.  **Estudos bíblicos:** (Campo de preenchimento em branco na tabela)
+			3.  **Horas:** (Campo [opcional se pioneiro ou regular na configuração] de preenchimento em branco na tabela, com a instrução "se for pioneiro auxiliar, regular, especial ou missionário em campo") - Botões de lançamento rápido: +5min, +10min,  +15min, +30min, +1h - Botões de lançamento rápido também permiti editar campo de horas manualmente
+			4.  **Observações:** (Campo de texto amplo para preenchimento)
+ 		- Cadastrar revisita a fazer (Nome, Endereço, Data prevista, Notas (opcional)) - Nova revisita deve ser uma janela nova
+ - Configurações
+   - Nome do publicador
+   - Designação atual
+     - Publicador, pioneiro auxiliar, pioneiro regular
+     - Se pioneiro regular, definir inicio da designação e quantas horas mensais requeridas
+     - Se pioneiro auxiliar, definir inicio e fim (fim é campo opcional) da designação e quantas horas mensais requeridas
+    - Idiomas:
+    	- Detectar idioma do dispositivo (Default)
+	- PT-BR  (Selecionável ou definido pelo sistema)
+	- EN-US (Selecionável ou definido pelo sistema)
+	- ES-ES (Selecionável ou definido pelo sistema)
+	Notificar da revisita: 1,2,3 .. 7 dias antes
+   - Tens claro, escuro ou igual ao sistema 
+   - Backup
+     - Agendado (Habilitar e Desabilitar)
+     - Manual
+     - Compartilhar backup
+   - Restore
+ - Ajuda
+   - Instrução de como usar o aplicativo
+   
+   
+   

@@ -1,24 +1,52 @@
+// @ts-expect-error Node fs module types not bundled
+import fs from 'node:fs';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
+const hasCert = fs.existsSync('./dev-cert.key') && fs.existsSync('./dev-cert.crt');
+
 // https://vitejs.dev/config/
 export default defineConfig({
   base: '/relatorio-servicos/',
+  server: {
+    https: hasCert
+      ? {
+          key: fs.readFileSync('./dev-cert.key'),
+          cert: fs.readFileSync('./dev-cert.crt'),
+        }
+      : undefined,
+  },
   plugins: [
     react(),
     tailwindcss(),
+    {
+      name: 'dev-redirect-root-to-base',
+      configureServer(server) {
+        server.middlewares.use((req, res, next) => {
+          const requestUrl = (req as { url?: string }).url;
+          if (requestUrl === '/' || requestUrl === '') {
+            res.writeHead(302, { Location: '/relatorio-servicos/' });
+            res.end();
+            return;
+          }
+          next();
+        });
+      },
+    },
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: [
         'favicon.svg',
+        'favicon-dev.svg',
         'apple-touch-icon.png',
         'icon-192.png',
         'icon-512.png',
         'icon-maskable.png',
       ],
       manifest: {
+        id: '/relatorio-servicos/',
         name: 'Relatório de Serviço PWA',
         short_name: 'Relatório',
         description: 'Controle pessoal e offline do ministério de campo das Testemunhas de Jeová.',
@@ -36,6 +64,12 @@ export default defineConfig({
             sizes: '192x192',
             type: 'image/png',
             purpose: 'any',
+          },
+          {
+            src: 'icon-192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'maskable',
           },
           {
             src: 'icon-512.png',
@@ -74,7 +108,8 @@ export default defineConfig({
         ],
       },
       devOptions: {
-        enabled: false,
+        enabled: true,
+        type: 'classic',
       },
     }),
   ],

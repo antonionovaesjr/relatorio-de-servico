@@ -11,6 +11,8 @@ import {
   UserPlus,
   ChevronDown,
   ChevronUp,
+  Navigation,
+  Loader2,
 } from 'lucide-react';
 
 
@@ -23,13 +25,14 @@ import {
   parseHHMMToMinutes,
 } from '../../utils/date';
 import { triggerHaptic } from '../../utils/haptics';
+import { getCurrentCoordinates, reverseGeocode, getGoogleMapsUrl, getGeolocationErrorMessage } from '../../utils/geolocation';
 
 export const RegisterView: React.FC = () => {
   // Estado do Lançamento Diário
   const [date, setDate] = useState(() => todayDateString());
   const [timeInput, setTimeInput] = useState('01:00');
-  const [bibleStudies, setBibleStudies] = useState(0);
-  const [returnVisitsCount, setReturnVisitsCount] = useState(0);
+  const [bibleStudies, setBibleStudies] = useState<number>(0);
+  const [returnVisitsCount, setReturnVisitsCount] = useState<number>(0);
   const [notes, setNotes] = useState('');
 
   // Feedbacks
@@ -40,6 +43,14 @@ export const RegisterView: React.FC = () => {
   const [isRevisitOpen, setIsRevisitOpen] = useState(false);
   const [revisitName, setRevisitName] = useState('');
   const [revisitAddress, setRevisitAddress] = useState('');
+  const [revisitNumber, setRevisitNumber] = useState('');
+  const [revisitComplement, setRevisitComplement] = useState('');
+  const [revisitCity, setRevisitCity] = useState('');
+  const [revisitLat, setRevisitLat] = useState<number | undefined>(undefined);
+  const [revisitLng, setRevisitLng] = useState<number | undefined>(undefined);
+  const [isLocatingRevisit, setIsLocatingRevisit] = useState(false);
+  const [revisitLocationStatus, setRevisitLocationStatus] = useState<string | null>(null);
+
   const [revisitTopic, setRevisitTopic] = useState('');
   const [revisitLastDate, setRevisitLastDate] = useState(() => todayDateString());
   const [revisitPublication, setRevisitPublication] = useState('');
@@ -97,10 +108,50 @@ export const RegisterView: React.FC = () => {
   };
 
 
-  // Abrir Google Maps para endereço
-  const handleOpenMaps = (addr: string) => {
-    if (!addr.trim()) return;
-    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr.trim())}`;
+  // Capturar Localização Atual por GPS na Revisita
+  const handleGetCurrentLocationRevisit = async () => {
+    triggerHaptic(10);
+    setIsLocatingRevisit(true);
+    setRevisitLocationStatus('Obtendo GPS...');
+
+    try {
+      const coords = await getCurrentCoordinates();
+      setRevisitLat(coords.latitude);
+      setRevisitLng(coords.longitude);
+
+      const geocode = await reverseGeocode(coords.latitude, coords.longitude);
+
+      if (geocode.address) {
+        setRevisitAddress(geocode.address);
+      }
+      if (geocode.number && !revisitNumber) {
+        setRevisitNumber(geocode.number);
+      }
+      if (geocode.city) {
+        setRevisitCity(geocode.city);
+      }
+
+      setRevisitLocationStatus('Localização preenchida via GPS!');
+      setTimeout(() => setRevisitLocationStatus(null), 3500);
+    } catch (err: unknown) {
+      setRevisitLocationStatus(getGeolocationErrorMessage(err));
+      setTimeout(() => setRevisitLocationStatus(null), 6000);
+    } finally {
+      setIsLocatingRevisit(false);
+    }
+  };
+
+  // Abrir Google Maps para endereço da revisita
+  const handleOpenMaps = () => {
+    triggerHaptic(8);
+    const url = getGoogleMapsUrl({
+      address: revisitAddress,
+      number: revisitNumber,
+      complement: revisitComplement,
+      city: revisitCity,
+      latitude: revisitLat,
+      longitude: revisitLng,
+    });
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
@@ -116,6 +167,11 @@ export const RegisterView: React.FC = () => {
       contactName: revisitName.trim(),
       monthKey,
       address: revisitAddress.trim() || undefined,
+      number: revisitNumber.trim() || undefined,
+      complement: revisitComplement.trim() || undefined,
+      city: revisitCity.trim() || undefined,
+      latitude: revisitLat,
+      longitude: revisitLng,
       topic: revisitTopic.trim() || undefined,
       lastVisitDate: revisitLastDate || todayDateString(),
       publication: revisitPublication.trim() || undefined,
@@ -131,6 +187,11 @@ export const RegisterView: React.FC = () => {
     // Limpa campos da revisita
     setRevisitName('');
     setRevisitAddress('');
+    setRevisitNumber('');
+    setRevisitComplement('');
+    setRevisitCity('');
+    setRevisitLat(undefined);
+    setRevisitLng(undefined);
     setRevisitTopic('');
     setRevisitPublication('');
     setRevisitNotes('');
@@ -375,28 +436,96 @@ export const RegisterView: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#657484] dark:text-[#CBD5E1] mb-1">
-                Endereço
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="flex items-center gap-1.5 text-xs font-semibold text-[#657484] dark:text-[#CBD5E1]">
+                  <MapPin className="w-3.5 h-3.5 text-[#001E62] dark:text-[#60A5FA]" />
+                  <span>Rua / Logradouro</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={handleGetCurrentLocationRevisit}
+                  disabled={isLocatingRevisit}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#E8EEF8] dark:bg-[#172554] text-[#001E62] dark:text-[#93C5FD] hover:bg-[#001E62] hover:text-white dark:hover:bg-[#1D4ED8] transition-colors text-[11px] font-bold border border-[#001E62]/30 dark:border-[#3B82F6]/40 disabled:opacity-50"
+                  title="Obter localização atual por GPS"
+                >
+                  {isLocatingRevisit ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Navigation className="w-3.5 h-3.5" />
+                  )}
+                  <span>{isLocatingRevisit ? 'Obtendo GPS...' : 'Obter GPS'}</span>
+                </button>
+              </div>
+
               <div className="flex gap-1.5">
                 <input
                   type="text"
                   value={revisitAddress}
                   onChange={(e) => setRevisitAddress(e.target.value)}
-                  placeholder="Rua das Flores, 123"
+                  placeholder="Ex: Rua das Flores"
                   className="flex-1 bg-[#F0F2F5] dark:bg-[#0B1320] text-slate-900 dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E9EDEF] dark:border-[#25364E] text-sm focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6]"
                 />
-                {revisitAddress.trim() && (
+                {(revisitAddress.trim() || revisitLat) && (
                   <button
                     type="button"
-                    onClick={() => handleOpenMaps(revisitAddress)}
+                    onClick={handleOpenMaps}
                     title="Ver no Google Maps"
-                    className="p-2.5 rounded-xl bg-[#E8EEF8] dark:bg-[#172554] text-[#001E62] dark:text-[#93C5FD] hover:bg-[#001E62] hover:text-white dark:hover:bg-[#1D4ED8] transition-colors border border-[#001E62]/20 dark:border-[#3B82F6]/30"
+                    className="p-2.5 rounded-xl bg-[#E8EEF8] dark:bg-[#172554] text-[#001E62] dark:text-[#93C5FD] hover:bg-[#001E62] hover:text-white dark:hover:bg-[#1D4ED8] transition-colors border border-[#001E62]/20 dark:border-[#3B82F6]/30 shrink-0"
                   >
-                    <MapPin className="w-4 h-4" />
+                    <span className="text-base">🗺️</span>
                   </button>
                 )}
               </div>
+
+              {revisitLocationStatus && (
+                <p className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1 animate-fade-in">
+                  <span>📍</span>
+                  <span>{revisitLocationStatus}</span>
+                </p>
+              )}
+            </div>
+
+            {/* Número e Complemento */}
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-xs font-semibold text-[#657484] dark:text-[#CBD5E1] mb-1">
+                  Número
+                </label>
+                <input
+                  type="text"
+                  value={revisitNumber}
+                  onChange={(e) => setRevisitNumber(e.target.value)}
+                  placeholder="Ex: 123 ou S/N"
+                  className="w-full bg-[#F0F2F5] dark:bg-[#0B1320] text-slate-900 dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E9EDEF] dark:border-[#25364E] text-sm focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[#657484] dark:text-[#CBD5E1] mb-1">
+                  Complemento
+                </label>
+                <input
+                  type="text"
+                  value={revisitComplement}
+                  onChange={(e) => setRevisitComplement(e.target.value)}
+                  placeholder="Ex: Apto 102, Bloco B"
+                  className="w-full bg-[#F0F2F5] dark:bg-[#0B1320] text-slate-900 dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E9EDEF] dark:border-[#25364E] text-sm focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6]"
+                />
+              </div>
+            </div>
+
+            {/* Cidade */}
+            <div>
+              <label className="block text-xs font-semibold text-[#657484] dark:text-[#CBD5E1] mb-1">
+                Cidade
+              </label>
+              <input
+                type="text"
+                value={revisitCity}
+                onChange={(e) => setRevisitCity(e.target.value)}
+                placeholder="Ex: São Paulo"
+                className="w-full bg-[#F0F2F5] dark:bg-[#0B1320] text-slate-900 dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E9EDEF] dark:border-[#25364E] text-sm focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6]"
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-2">

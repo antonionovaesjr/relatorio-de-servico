@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { WifiOff, Sun, Moon, Plus } from 'lucide-react';
+import { WifiOff, Sun, Moon } from 'lucide-react';
 import { BottomNavBar, type TabType } from '../components/navigation/BottomNavBar';
 import { triggerHaptic } from '../utils/haptics';
 import type { AppTheme } from '../types/models';
 import { useTranslation } from '../i18n/I18nContext';
+import { isDevEnvironment } from '../utils/env';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -52,9 +53,6 @@ export const Layout: React.FC<LayoutProps> = ({
     }
   })();
 
-  // Visibilidade do FAB flutuante de canto (visível em Início e Relatórios)
-  const isFabVisible = currentTab === 'home' || currentTab === 'report';
-
   return (
     <div className="min-h-screen bg-[#F4F6F9] dark:bg-[#0A111E] text-[#0A111E] dark:text-[#F8FAFC] flex flex-col antialiased transition-colors duration-200">
       {/* ⚠️ Estado Offline: Banner discreto no topo */}
@@ -73,8 +71,13 @@ export const Layout: React.FC<LayoutProps> = ({
               RS
             </div>
             <div>
-              <h1 className="text-base font-bold tracking-tight text-white leading-tight">
-                {headerTitle}
+              <h1 className="text-base font-bold tracking-tight text-white leading-tight flex items-center gap-1.5">
+                <span>{headerTitle}</span>
+                {isDevEnvironment() && (
+                  <span className="text-[10px] font-black uppercase px-1.5 py-0.5 rounded bg-red-600 text-white tracking-widest shadow-xs">
+                    DEV
+                  </span>
+                )}
               </h1>
               <p className="text-[11px] text-[#CBD8EE] dark:text-[#93C5FD] leading-none">
                 {t('common.privateNotice')}
@@ -106,23 +109,6 @@ export const Layout: React.FC<LayoutProps> = ({
       <main className="flex-1 max-w-md w-full mx-auto px-3.5 pt-3 pb-24">
         {children}
       </main>
-
-      {/* 🟦 FAB Flutuante (bottom-right) — Visível em Início e Relatórios */}
-      {isFabVisible && (
-        <button
-          onClick={() => {
-            triggerHaptic(15);
-            onOpenRegisterModal();
-          }}
-          className={`fixed bottom-20 right-5 z-30 w-14 h-14 rounded-full bg-[#001E62] hover:bg-[#001545] text-white dark:bg-[#1D4ED8] dark:hover:bg-[#2563EB] shadow-xl flex items-center justify-center transition-all duration-200 active:scale-90 focus:outline-none focus:ring-4 focus:ring-[#001E62]/30 dark:focus:ring-blue-500/40 ${
-            currentTab === 'report' ? 'ring-2 ring-blue-300/50' : ''
-          }`}
-          title={t('nav.newEntry')}
-          aria-label={t('nav.newEntry')}
-        >
-          <Plus className="w-7 h-7 stroke-[2.8]" />
-        </button>
-      )}
 
       {/* Barra de Navegação Inferior Estilo WhatsApp */}
       <BottomNavBar

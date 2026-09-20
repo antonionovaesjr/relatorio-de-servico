@@ -16,6 +16,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   language: 'pt-BR',
   fontSize: 'normal',
   revisitNotificationDays: 1,
+  remindReportEndOfMonth: true,
   scheduledBackupEnabled: false,
   updatedAt: new Date().toISOString(),
 };

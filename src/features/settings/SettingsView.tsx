@@ -29,6 +29,8 @@ import {
 import type { UserSettings, UserRole, AppTheme, AppLanguage, AppFontSize } from '../../types/models';
 import { triggerHaptic } from '../../utils/haptics';
 import { useTranslation } from '../../i18n/I18nContext';
+import { requestNotificationPermission } from '../../utils/notifications';
+import { usePWAInstall } from '../../utils/usePWAInstall';
 
 interface SettingsViewProps {
   currentTheme: AppTheme;
@@ -38,6 +40,7 @@ interface SettingsViewProps {
 export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThemeChange }) => {
   const { t } = useTranslation();
   const settings = useUserSettings();
+  const { canInstall, isInstalled, installApp } = usePWAInstall();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
@@ -502,19 +505,45 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
         </div>
       </section>
 
-      {/* 🔔 NOTIFICAÇÃO DE REVISITA (1 A 7 DIAS) */}
-      <section className="bg-white dark:bg-[#111A29] rounded-xl p-4 border border-[#E1E1E1] dark:border-[#1F2E44] shadow-sm space-y-3">
+      {/* 🔔 NOTIFICAÇÕES & LEMBRETES */}
+      <section className="bg-white dark:bg-[#111A29] rounded-xl p-4 border border-[#E1E1E1] dark:border-[#1F2E44] shadow-sm space-y-3.5">
         <div className="flex items-center gap-2 pb-2 border-b border-[#E1E1E1] dark:border-[#1F2E44]">
           <span className="w-2.5 h-2.5 rounded-full bg-[#001E62] dark:bg-[#60A5FA]" />
           <h2 className="text-xs font-bold text-[#001E62] dark:text-[#93C5FD] tracking-wider uppercase">
-            🔔 {t('settings.notificationsLabel')}
+            🔔 {t('settings.notificationsSection')}
           </h2>
         </div>
 
-        <div>
+        {/* Checkbox: Lembrar de enviar relatório no final do mês */}
+        <label className="flex items-start gap-3 p-3 rounded-xl bg-[#F0F2F5] dark:bg-[#0B1320] border border-[#E1E1E1] dark:border-[#202E42] cursor-pointer select-none transition-colors hover:border-[#001E62]/40 dark:hover:border-[#3B82F6]/50">
+          <input
+            type="checkbox"
+            checked={settings.remindReportEndOfMonth !== false}
+            onChange={async (e) => {
+              triggerHaptic(8);
+              const checked = e.target.checked;
+              if (checked) {
+                await requestNotificationPermission();
+              }
+              updateSettings({ remindReportEndOfMonth: checked });
+            }}
+            className="mt-0.5 w-4 h-4 rounded text-[#001E62] dark:text-[#3B82F6] focus:ring-[#001E62] border-[#657484]/40 accent-[#001E62] dark:accent-[#3B82F6]"
+          />
+          <div className="flex-1">
+            <span className="text-xs font-bold text-[#111B1F] dark:text-[#F8FAFC] block">
+              {t('settings.remindReportEndOfMonthLabel')}
+            </span>
+            <span className="text-[11px] text-[#657484] dark:text-[#94A3B8] block mt-0.5 leading-relaxed">
+              {t('settings.remindReportEndOfMonthDesc')}
+            </span>
+          </div>
+        </label>
+
+        {/* Notificação de Revisitas */}
+        <div className="pt-1">
           <label className="flex items-center gap-1.5 text-xs font-semibold text-[#5C6B7E] dark:text-[#CBD5E1] mb-1.5">
             <Bell className="w-3.5 h-3.5 text-[#001E62] dark:text-[#60A5FA]" />
-            <span>⏳ Lembrar com antecedência:</span>
+            <span>⏳ {t('settings.notificationsLabel')}:</span>
           </label>
           <select
             value={settings.revisitNotificationDays || 1}
@@ -576,6 +605,55 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentTheme, onThem
             );
           })}
         </div>
+      </section>
+
+      {/* 📱 APLICATIVO WEB (PWA) */}
+      <section className="bg-white dark:bg-[#111A29] rounded-xl p-4 border border-[#E1E1E1] dark:border-[#1F2E44] shadow-sm space-y-3">
+        <div className="flex items-center gap-2 pb-2 border-b border-[#E1E1E1] dark:border-[#1F2E44]">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#001E62] dark:bg-[#60A5FA]" />
+          <h2 className="text-xs font-bold text-[#001E62] dark:text-[#93C5FD] tracking-wider uppercase">
+            📱 Aplicativo (PWA)
+          </h2>
+        </div>
+
+        {isInstalled ? (
+          <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-semibold">
+            <Check className="w-4 h-4 stroke-[3]" />
+            <span>Aplicativo instalado como WebApp nativo na tela inicial!</span>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-xs text-[#5C6B7E] dark:text-[#94A3B8] leading-relaxed">
+              Instale na tela inicial do seu celular para abri-lo como aplicativo nativo em tela cheia e com o ícone oficial (sem o mini-logo do navegador no canto).
+            </p>
+
+            {canInstall && (
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic(10);
+                  installApp();
+                }}
+                className="w-full py-2.5 px-4 rounded-xl bg-[#001E62] hover:bg-[#001545] dark:bg-[#1D4ED8] dark:hover:bg-[#2563EB] text-white text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95"
+              >
+                <Download className="w-4 h-4" />
+                <span>Instalar Aplicativo Oficial</span>
+              </button>
+            )}
+
+            <div className="p-3 rounded-xl bg-[#F0F2F5] dark:bg-[#0B1320] border border-[#E1E1E1] dark:border-[#202E42] text-[11px] text-[#5C6B7E] dark:text-[#94A3B8] space-y-1.5">
+              <p className="font-semibold text-[#111B1F] dark:text-[#F8FAFC]">
+                💡 Como garantir o ícone limpo do aplicativo:
+              </p>
+              <p>
+                <strong>No Android (Chrome):</strong> Toque no menu (3 pontinhos) e escolha <strong className="text-[#001E62] dark:text-[#60A5FA]">"Instalar aplicativo"</strong> (e não apenas "Adicionar à tela inicial"). Dessa forma, o Android cria o WebAPK oficial com o ícone original do app.
+              </p>
+              <p>
+                <strong>No iPhone (Safari):</strong> Toque no botão <strong className="text-[#001E62] dark:text-[#60A5FA]">Compartilhar</strong> (quadrado com seta para cima) e escolha <strong className="text-[#001E62] dark:text-[#60A5FA]">"Adicionar à Tela de Início"</strong>.
+              </p>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* 💾 BACKUP */}

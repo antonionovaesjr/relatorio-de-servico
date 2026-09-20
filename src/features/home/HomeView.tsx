@@ -18,6 +18,9 @@ import {
 } from '../../utils/date';
 import { triggerHaptic } from '../../utils/haptics';
 import { useTranslation } from '../../i18n/I18nContext';
+import { isEndOfMonth, checkAndTriggerEndOfMonthReminder } from '../../utils/notifications';
+import { formatFullAddress, getGoogleMapsUrl } from '../../utils/geolocation';
+import type { ReturnVisit } from '../../types/models';
 
 interface HomeViewProps {
   onGoToMonth: (monthKey: string) => void;
@@ -194,15 +197,47 @@ export const HomeView: React.FC<HomeViewProps> = ({ onGoToMonth, onGoToVisits })
     }
   }, [settings.role, t]);
 
-  const handleOpenMaps = (addr?: string) => {
-    if (!addr) return;
+  const handleOpenMaps = (visit: ReturnVisit) => {
     triggerHaptic(8);
-    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
+    window.open(getGoogleMapsUrl(visit), '_blank', 'noopener,noreferrer');
   };
+
+  // Dispara lembrete automático de final de mês se configurado
+  React.useEffect(() => {
+    if (settings.remindReportEndOfMonth !== false) {
+      checkAndTriggerEndOfMonthReminder(settings, t);
+    }
+  }, [settings, t]);
 
   return (
     <div className="space-y-3.5 pb-6 select-none animate-fade-in">
+      {/* 📋 Lembrete de Envio do Relatório no Final do Mês */}
+      {settings.remindReportEndOfMonth !== false && isEndOfMonth() && (
+        <section className="bg-[#E8EEF8] dark:bg-[#172554] border border-[#001E62]/30 dark:border-[#3B82F6]/50 rounded-xl p-3.5 flex items-center justify-between gap-3 shadow-xs animate-fade-in">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">📋</span>
+            <div>
+              <h3 className="text-xs font-bold text-[#001E62] dark:text-[#93C5FD]">
+                {t('settings.endOfMonthNoticeTitle')}
+              </h3>
+              <p className="text-[11px] text-[#5C6B7E] dark:text-[#CBD5E1] mt-0.5 leading-snug">
+                {t('settings.endOfMonthNoticeBody')}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic(8);
+              onGoToMonth(currentMonthKey);
+            }}
+            className="shrink-0 px-3 py-1.5 rounded-lg bg-[#001E62] hover:bg-[#001545] dark:bg-[#1D4ED8] dark:hover:bg-[#2563EB] text-white text-xs font-bold shadow-xs active:scale-95 transition-all"
+          >
+            {t('nav.reports')}
+          </button>
+        </section>
+      )}
+
       {/* 👤 CARD PRINCIPAL: PERFIL & RESUMO DO ANO DE SERVIÇO */}
       <section className="bg-white dark:bg-[#111A29] rounded-xl p-4 border border-[#DDE3EA] dark:border-[#1F2E44] shadow-sm space-y-3">
         {/* Perfil */}
@@ -468,9 +503,9 @@ export const HomeView: React.FC<HomeViewProps> = ({ onGoToMonth, onGoToVisits })
               <h3 className="text-sm font-bold text-[#0A111E] dark:text-[#F8FAFC]">
                 👤 {nextVisit.contactName}
               </h3>
-              {nextVisit.address && (
+              {formatFullAddress(nextVisit) && (
                 <p className="text-xs text-[#5C6B7E] dark:text-[#CBD5E1] mt-0.5">
-                  📍 {nextVisit.address}
+                  📍 {formatFullAddress(nextVisit)}
                 </p>
               )}
               {nextVisit.scheduledDate && (
@@ -480,10 +515,10 @@ export const HomeView: React.FC<HomeViewProps> = ({ onGoToMonth, onGoToVisits })
               )}
             </div>
 
-            {nextVisit.address && (
+            {(formatFullAddress(nextVisit) || nextVisit.latitude) && (
               <button
                 type="button"
-                onClick={() => handleOpenMaps(nextVisit.address)}
+                onClick={() => handleOpenMaps(nextVisit)}
                 title={t('home.openMaps')}
                 className="p-2.5 rounded-xl bg-[#E8EEF8] dark:bg-[#172554] text-[#001E62] dark:text-[#93C5FD] hover:bg-[#001E62] hover:text-white dark:hover:bg-[#1E3A8A] transition-colors border border-[#CBD8EE] dark:border-[#3B82F6]/40 shrink-0"
               >

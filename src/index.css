@@ -85,3 +85,115 @@ html {
 .animate-fade-in {
   animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* ==========================================================================
+   AMBIENTE DE DESENVOLVIMENTO (DEV) - PALETA ROXA
+   Ativa apenas quando a tag <html> possui a classe 'env-dev'
+   (localhost, 127.0.0.1, 192.168.x.x)
+   ========================================================================== */
+html.env-dev {
+  --color-midnight: #6B21A8;
+  --color-midnight-inst: #6B21A8;
+  --color-midnight-hover: #581C87;
+  --color-midnight-light: #F3E8FF;
+  --color-midnight-track: #E9D5FF;
+}
+
+/* Light Mode Overrides para DEV */
+html.env-dev .bg-\[\#001E62\] {
+  background-color: #6B21A8 !important;
+}
+html.env-dev .hover\:bg-\[\#001545\]:hover,
+html.env-dev .hover\:bg-\[\#001E62\]:hover,
+html.env-dev .bg-\[\#001545\] {
+  background-color: #581C87 !important;
+}
+html.env-dev .text-\[\#001E62\] {
+  color: #6B21A8 !important;
+}
+html.env-dev .stroke-\[\#001E62\] {
+  stroke: #6B21A8 !important;
+}
+html.env-dev .border-\[\#001E62\] {
+  border-color: #6B21A8 !important;
+}
+html.env-dev .border-\[\#001545\] {
+  border-color: #581C87 !important;
+}
+html.env-dev .bg-\[\#E8EEF8\] {
+  background-color: #F3E8FF !important;
+}
+html.env-dev .bg-\[\#E8EEF8\]\/60 {
+  background-color: rgba(243, 232, 255, 0.6) !important;
+}
+html.env-dev .border-\[\#001E62\]\/20 {
+  border-color: rgba(107, 33, 168, 0.2) !important;
+}
+html.env-dev .border-\[\#001E62\]\/30 {
+  border-color: rgba(107, 33, 168, 0.3) !important;
+}
+html.env-dev .border-\[\#001E62\]\/40 {
+  border-color: rgba(107, 33, 168, 0.4) !important;
+}
+html.env-dev [class*="focus:ring-[#001E62]"]:focus {
+  --tw-ring-color: rgba(107, 33, 168, 0.35) !important;
+  border-color: #6B21A8 !important;
+}
+html.env-dev .accent-\[\#001E62\] {
+  accent-color: #6B21A8 !important;
+}
+
+/* Dark Mode Overrides para DEV */
+html.env-dev.dark .dark\:bg-\[\#1D4ED8\],
+html.env-dev .dark .dark\:bg-\[\#1D4ED8\] {
+  background-color: #7E22CE !important;
+}
+html.env-dev.dark .dark\:hover\:bg-\[\#2563EB\]:hover,
+html.env-dev .dark .dark\:hover\:bg-\[\#2563EB\]:hover {
+  background-color: #9333EA !important;
+}
+html.env-dev.dark .dark\:bg-\[\#172554\],
+html.env-dev .dark .dark\:bg-\[\#172554\] {
+  background-color: #2E1065 !important;
+}
+html.env-dev.dark .dark\:bg-\[\#172554\]\/50,
+html.env-dev .dark .dark\:bg-\[\#172554\]\/50 {
+  background-color: rgba(46, 16, 101, 0.5) !important;
+}
+html.env-dev.dark .dark\:bg-\[\#1E3A8A\],
+html.env-dev .dark .dark\:bg-\[\#1E3A8A\] {
+  background-color: #581C87 !important;
+}
+html.env-dev.dark .dark\:text-\[\#60A5FA\],
+html.env-dev .dark .dark\:text-\[\#60A5FA\] {
+  color: #C084FC !important;
+}
+html.env-dev.dark .dark\:text-\[\#93C5FD\],
+html.env-dev .dark .dark\:text-\[\#93C5FD\] {
+  color: #DDD6FE !important;
+}
+html.env-dev.dark .dark\:stroke-\[\#60A5FA\],
+html.env-dev .dark .dark\:stroke-\[\#60A5FA\] {
+  stroke: #C084FC !important;
+}
+html.env-dev.dark .dark\:border-\[\#3B82F6\],
+html.env-dev .dark .dark\:border-\[\#3B82F6\] {
+  border-color: #9333EA !important;
+}
+html.env-dev.dark .dark\:border-\[\#3B82F6\]\/30,
+html.env-dev .dark .dark\:border-\[\#3B82F6\]\/30 {
+  border-color: rgba(147, 51, 234, 0.3) !important;
+}
+html.env-dev.dark .dark\:border-\[\#3B82F6\]\/40,
+html.env-dev .dark .dark\:border-\[\#3B82F6\]\/40 {
+  border-color: rgba(147, 51, 234, 0.4) !important;
+}
+html.env-dev.dark .dark\:border-\[\#3B82F6\]\/50,
+html.env-dev .dark .dark\:border-\[\#3B82F6\]\/50 {
+  border-color: rgba(147, 51, 234, 0.5) !important;
+}
+html.env-dev.dark .dark\:accent-\[\#3B82F6\],
+html.env-dev .dark .dark\:accent-\[\#3B82F6\] {
+  accent-color: #9333EA !important;
+}
+

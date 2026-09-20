@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Check, MapPin, User, Calendar, FileText, Ban } from 'lucide-react';
+import { ArrowLeft, Check, MapPin, User, Calendar, FileText, Ban, Navigation, Loader2 } from 'lucide-react';
 import { db } from '../../db/db';
 import { todayDateString, deriveMonthKeyFromDate } from '../../utils/date';
 import { triggerHaptic } from '../../utils/haptics';
 import { useTranslation } from '../../i18n/I18nContext';
+import { getCurrentCoordinates, reverseGeocode, getGoogleMapsUrl, getGeolocationErrorMessage } from '../../utils/geolocation';
 
 interface RevisitModalProps {
   isOpen: boolean;
@@ -15,16 +16,62 @@ export const RevisitModal: React.FC<RevisitModalProps> = ({ isOpen, onClose, onS
   const { t } = useTranslation();
   const [contactName, setContactName] = useState('');
   const [address, setAddress] = useState('');
+  const [number, setNumber] = useState('');
+  const [complement, setComplement] = useState('');
+  const [city, setCity] = useState('');
+  const [latitude, setLatitude] = useState<number | undefined>(undefined);
+  const [longitude, setLongitude] = useState<number | undefined>(undefined);
+  const [isLocating, setIsLocating] = useState(false);
+  const [locationStatus, setLocationStatus] = useState<string | null>(null);
+
   const [scheduledDate, setScheduledDate] = useState(() => todayDateString());
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
 
+  const handleGetCurrentLocation = async () => {
+    triggerHaptic(10);
+    setIsLocating(true);
+    setLocationStatus(t('revisit.gettingLocation'));
+
+    try {
+      const coords = await getCurrentCoordinates();
+      setLatitude(coords.latitude);
+      setLongitude(coords.longitude);
+
+      const geocode = await reverseGeocode(coords.latitude, coords.longitude);
+
+      if (geocode.address) {
+        setAddress(geocode.address);
+      }
+      if (geocode.number && !number) {
+        setNumber(geocode.number);
+      }
+      if (geocode.city) {
+        setCity(geocode.city);
+      }
+
+      setLocationStatus(t('revisit.locationSuccess'));
+      setTimeout(() => setLocationStatus(null), 3500);
+    } catch (err: unknown) {
+      setLocationStatus(getGeolocationErrorMessage(err));
+      setTimeout(() => setLocationStatus(null), 6000);
+    } finally {
+      setIsLocating(false);
+    }
+  };
+
   const handleOpenMaps = () => {
-    if (!address.trim()) return;
     triggerHaptic(8);
-    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address.trim())}`;
+    const url = getGoogleMapsUrl({
+      address,
+      number,
+      complement,
+      city,
+      latitude,
+      longitude,
+    });
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
@@ -41,6 +88,11 @@ export const RevisitModal: React.FC<RevisitModalProps> = ({ isOpen, onClose, onS
         contactName: contactName.trim(),
         monthKey,
         address: address.trim() || undefined,
+        number: number.trim() || undefined,
+        complement: complement.trim() || undefined,
+        city: city.trim() || undefined,
+        latitude,
+        longitude,
         scheduledDate: scheduledDate || undefined,
         notes: notes.trim(),
         isCompleted: false,
@@ -107,12 +159,31 @@ export const RevisitModal: React.FC<RevisitModalProps> = ({ isOpen, onClose, onS
             />
           </div>
 
-          {/* 📍 Endereço com botão Maps */}
+          {/* 📍 Endereço com botão GPS e Maps */}
           <div>
-            <label className="flex items-center gap-1.5 text-xs font-bold text-[#111B1F] dark:text-[#CBD5E1] mb-1">
-              <MapPin className="w-3.5 h-3.5 text-[#001E62] dark:text-[#60A5FA]" />
-              <span>{t('revisit.address')}</span>
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="flex items-center gap-1.5 text-xs font-bold text-[#111B1F] dark:text-[#CBD5E1]">
+                <MapPin className="w-3.5 h-3.5 text-[#001E62] dark:text-[#60A5FA]" />
+                <span>{t('revisit.address')}</span>
+              </label>
+
+              {/* Botão Obter Localização Atual */}
+              <button
+                type="button"
+                onClick={handleGetCurrentLocation}
+                disabled={isLocating}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#E8EEF8] dark:bg-[#172554] text-[#001E62] dark:text-[#93C5FD] hover:bg-[#001E62] hover:text-white dark:hover:bg-[#1D4ED8] transition-colors text-[11px] font-bold border border-[#001E62]/30 dark:border-[#3B82F6]/40 disabled:opacity-50"
+                title={t('revisit.getLocation')}
+              >
+                {isLocating ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Navigation className="w-3.5 h-3.5" />
+                )}
+                <span>{isLocating ? t('revisit.gettingLocation') : t('revisit.getLocation')}</span>
+              </button>
+            </div>
+
             <div className="flex gap-1.5">
               <input
                 type="text"
@@ -124,16 +195,63 @@ export const RevisitModal: React.FC<RevisitModalProps> = ({ isOpen, onClose, onS
               <button
                 type="button"
                 onClick={handleOpenMaps}
-                disabled={!address.trim()}
+                disabled={!address.trim() && !latitude}
                 title={t('home.openMaps')}
-                className="px-3 rounded-xl bg-[#E8EEF8] dark:bg-[#172554] text-[#001E62] dark:text-[#93C5FD] hover:bg-[#001E62] hover:text-white dark:hover:bg-[#1D4ED8] transition-colors border border-[#001E62]/30 dark:border-[#3B82F6]/40 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center"
+                className="px-3 rounded-xl bg-[#E8EEF8] dark:bg-[#172554] text-[#001E62] dark:text-[#93C5FD] hover:bg-[#001E62] hover:text-white dark:hover:bg-[#1D4ED8] transition-colors border border-[#001E62]/30 dark:border-[#3B82F6]/40 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center shrink-0"
               >
                 <span className="text-base">🗺️</span>
               </button>
             </div>
-            <p className="text-[10px] text-[#657484] dark:text-[#94A3B8] mt-1">
-              {t('revisit.openMapsHint')}
-            </p>
+
+            {locationStatus && (
+              <p className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1 animate-fade-in">
+                <span>📍</span>
+                <span>{locationStatus}</span>
+              </p>
+            )}
+          </div>
+
+          {/* 🔢 Número e Complemento */}
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-xs font-semibold text-[#111B1F] dark:text-[#CBD5E1] mb-1">
+                {t('revisit.number')}
+              </label>
+              <input
+                type="text"
+                value={number}
+                onChange={(e) => setNumber(e.target.value)}
+                placeholder={t('revisit.numberPlaceholder')}
+                className="w-full text-sm bg-[#F0F2F5] dark:bg-[#0B1320] text-[#111B1F] dark:text-[#F8FAFC] px-3.5 py-2 rounded-xl border border-[#E1E1E1] dark:border-[#25364E] focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#111B1F] dark:text-[#CBD5E1] mb-1">
+                {t('revisit.complement')}
+              </label>
+              <input
+                type="text"
+                value={complement}
+                onChange={(e) => setComplement(e.target.value)}
+                placeholder={t('revisit.complementPlaceholder')}
+                className="w-full text-sm bg-[#F0F2F5] dark:bg-[#0B1320] text-[#111B1F] dark:text-[#F8FAFC] px-3.5 py-2 rounded-xl border border-[#E1E1E1] dark:border-[#25364E] focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6]"
+              />
+            </div>
+          </div>
+
+          {/* 🏙️ Cidade */}
+          <div>
+            <label className="block text-xs font-semibold text-[#111B1F] dark:text-[#CBD5E1] mb-1">
+              {t('revisit.city')}
+            </label>
+            <input
+              type="text"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder={t('revisit.cityPlaceholder')}
+              className="w-full text-sm bg-[#F0F2F5] dark:bg-[#0B1320] text-[#111B1F] dark:text-[#F8FAFC] px-3.5 py-2 rounded-xl border border-[#E1E1E1] dark:border-[#25364E] focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6]"
+            />
           </div>
 
           {/* 📅 Data prevista */}

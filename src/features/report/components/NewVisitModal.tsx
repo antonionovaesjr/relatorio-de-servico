@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { X, User, Check, MapPin } from 'lucide-react';
+import { X, User, Check, MapPin, Navigation, Loader2 } from 'lucide-react';
 
 import { triggerHaptic } from '../../../utils/haptics';
 import { todayDateString } from '../../../utils/date';
+import { getCurrentCoordinates, reverseGeocode, getGoogleMapsUrl, getGeolocationErrorMessage } from '../../../utils/geolocation';
 
 interface NewVisitModalProps {
   isOpen: boolean;
@@ -10,6 +11,11 @@ interface NewVisitModalProps {
   onSave: (data: {
     contactName: string;
     address?: string;
+    number?: string;
+    complement?: string;
+    city?: string;
+    latitude?: number;
+    longitude?: number;
     topic?: string;
     publication?: string;
     scheduledDate?: string;
@@ -20,6 +26,14 @@ interface NewVisitModalProps {
 export const NewVisitModal: React.FC<NewVisitModalProps> = ({ isOpen, onClose, onSave }) => {
   const [contactName, setContactName] = useState('');
   const [address, setAddress] = useState('');
+  const [number, setNumber] = useState('');
+  const [complement, setComplement] = useState('');
+  const [city, setCity] = useState('');
+  const [latitude, setLatitude] = useState<number | undefined>(undefined);
+  const [longitude, setLongitude] = useState<number | undefined>(undefined);
+  const [isLocating, setIsLocating] = useState(false);
+  const [locationStatus, setLocationStatus] = useState<string | null>(null);
+
   const [topic, setTopic] = useState('');
   const [publication, setPublication] = useState('');
   const [scheduledDate, setScheduledDate] = useState(() => todayDateString());
@@ -27,6 +41,38 @@ export const NewVisitModal: React.FC<NewVisitModalProps> = ({ isOpen, onClose, o
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
+
+  const handleGetCurrentLocation = async () => {
+    triggerHaptic(10);
+    setIsLocating(true);
+    setLocationStatus('Obtendo GPS...');
+
+    try {
+      const coords = await getCurrentCoordinates();
+      setLatitude(coords.latitude);
+      setLongitude(coords.longitude);
+
+      const geocode = await reverseGeocode(coords.latitude, coords.longitude);
+
+      if (geocode.address) {
+        setAddress(geocode.address);
+      }
+      if (geocode.number && !number) {
+        setNumber(geocode.number);
+      }
+      if (geocode.city) {
+        setCity(geocode.city);
+      }
+
+      setLocationStatus('Localização preenchida via GPS!');
+      setTimeout(() => setLocationStatus(null), 3500);
+    } catch (err: unknown) {
+      setLocationStatus(getGeolocationErrorMessage(err));
+      setTimeout(() => setLocationStatus(null), 6000);
+    } finally {
+      setIsLocating(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +83,11 @@ export const NewVisitModal: React.FC<NewVisitModalProps> = ({ isOpen, onClose, o
       await onSave({
         contactName: contactName.trim(),
         address: address.trim() || undefined,
+        number: number.trim() || undefined,
+        complement: complement.trim() || undefined,
+        city: city.trim() || undefined,
+        latitude,
+        longitude,
         topic: topic.trim() || undefined,
         publication: publication.trim() || undefined,
         scheduledDate: scheduledDate || undefined,
@@ -44,6 +95,11 @@ export const NewVisitModal: React.FC<NewVisitModalProps> = ({ isOpen, onClose, o
       });
       setContactName('');
       setAddress('');
+      setNumber('');
+      setComplement('');
+      setCity('');
+      setLatitude(undefined);
+      setLongitude(undefined);
       setTopic('');
       setPublication('');
       setScheduledDate(todayDateString());
@@ -55,8 +111,15 @@ export const NewVisitModal: React.FC<NewVisitModalProps> = ({ isOpen, onClose, o
   };
 
   const handleOpenMaps = () => {
-    if (!address.trim()) return;
-    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address.trim())}`;
+    triggerHaptic(8);
+    const url = getGoogleMapsUrl({
+      address,
+      number,
+      complement,
+      city,
+      latitude,
+      longitude,
+    });
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
@@ -97,28 +160,96 @@ export const NewVisitModal: React.FC<NewVisitModalProps> = ({ isOpen, onClose, o
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[#657484] dark:text-[#CBD5E1] mb-1">
-              Endereço
-            </label>
+            <div className="flex items-center justify-between mb-1">
+                <label className="flex items-center gap-1.5 text-xs font-semibold text-[#657484] dark:text-[#CBD5E1]">
+                  <MapPin className="w-3.5 h-3.5 text-[#001E62] dark:text-[#60A5FA]" />
+                  <span>Rua / Logradouro</span>
+                </label>
+              <button
+                type="button"
+                onClick={handleGetCurrentLocation}
+                disabled={isLocating}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#E8EEF8] dark:bg-[#172554] text-[#001E62] dark:text-[#93C5FD] hover:bg-[#001E62] hover:text-white dark:hover:bg-[#1D4ED8] transition-colors text-[11px] font-bold border border-[#001E62]/30 dark:border-[#3B82F6]/40 disabled:opacity-50"
+                title="Obter localização atual por GPS"
+              >
+                {isLocating ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Navigation className="w-3.5 h-3.5" />
+                )}
+                <span>{isLocating ? 'Obtendo GPS...' : 'Obter GPS'}</span>
+              </button>
+            </div>
+
             <div className="flex gap-1.5">
               <input
                 type="text"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                placeholder="Rua das Flores, 123"
+                placeholder="Ex: Rua das Flores"
                 className="flex-1 text-sm bg-[#F0F2F5] dark:bg-[#0B1320] text-slate-900 dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E9EDEF] dark:border-[#25364E] focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6]"
               />
-              {address.trim() && (
+              {(address.trim() || latitude) && (
                 <button
                   type="button"
                   onClick={handleOpenMaps}
                   title="Abrir no Google Maps"
-                  className="p-2.5 rounded-xl bg-[#E8EEF8] dark:bg-[#172554] text-[#001E62] dark:text-[#93C5FD] hover:bg-[#001E62] hover:text-white dark:hover:bg-[#1D4ED8] transition-colors border border-[#001E62]/20 dark:border-[#3B82F6]/40"
+                  className="p-2.5 rounded-xl bg-[#E8EEF8] dark:bg-[#172554] text-[#001E62] dark:text-[#93C5FD] hover:bg-[#001E62] hover:text-white dark:hover:bg-[#1D4ED8] transition-colors border border-[#001E62]/20 dark:border-[#3B82F6]/40 shrink-0"
                 >
-                  <MapPin className="w-4 h-4" />
+                  <span className="text-base">🗺️</span>
                 </button>
               )}
             </div>
+
+            {locationStatus && (
+              <p className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1 animate-fade-in">
+                <span>📍</span>
+                <span>{locationStatus}</span>
+              </p>
+            )}
+          </div>
+
+          {/* Número e Complemento */}
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-xs font-semibold text-[#657484] dark:text-[#CBD5E1] mb-1">
+                Número
+              </label>
+              <input
+                type="text"
+                value={number}
+                onChange={(e) => setNumber(e.target.value)}
+                placeholder="Ex: 123 ou S/N"
+                className="w-full text-sm bg-[#F0F2F5] dark:bg-[#0B1320] text-slate-900 dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E9EDEF] dark:border-[#25364E] focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#657484] dark:text-[#CBD5E1] mb-1">
+                Complemento
+              </label>
+              <input
+                type="text"
+                value={complement}
+                onChange={(e) => setComplement(e.target.value)}
+                placeholder="Ex: Apto 102, Bloco B"
+                className="w-full text-sm bg-[#F0F2F5] dark:bg-[#0B1320] text-slate-900 dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E9EDEF] dark:border-[#25364E] focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6]"
+              />
+            </div>
+          </div>
+
+          {/* Cidade */}
+          <div>
+            <label className="block text-xs font-semibold text-[#657484] dark:text-[#CBD5E1] mb-1">
+              Cidade
+            </label>
+            <input
+              type="text"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder="Ex: São Paulo"
+              className="w-full text-sm bg-[#F0F2F5] dark:bg-[#0B1320] text-slate-900 dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E9EDEF] dark:border-[#25364E] focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6]"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-2">

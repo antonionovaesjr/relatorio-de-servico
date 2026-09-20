@@ -1,0 +1,117 @@
+name: Deploy PWA to AWS S3 & CloudFront
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    name: Build & Deploy PWA
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Lint and Type Check
+        run: |
+          npm run lint
+          npx tsc --noEmit
+
+      - name: Build Production PWA
+        run: npm run build
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
+
+      - name: Deploy Static Assets (Long-term Cache)
+        run: |
+          PREFIX="${{ secrets.AWS_S3_PREFIX }}"
+          TARGET_URI="s3://${{ secrets.AWS_S3_BUCKET }}/${PREFIX}"
+
+          echo "Enviando assets estáticos com cache longo para ${TARGET_URI}..."
+          aws s3 sync dist/ "${TARGET_URI}" \
+            --delete \
+            --cache-control "public, max-age=31536000, immutable" \
+            --exclude "index.html" \
+            --exclude "sw.js" \
+            --exclude "*.webmanifest" \
+            --exclude "workbox-*.js"
+
+      - name: Deploy Service Worker, Manifest and Index (No-Cache)
+        run: |
+          PREFIX="${{ secrets.AWS_S3_PREFIX }}"
+          TARGET_URI="s3://${{ secrets.AWS_S3_BUCKET }}/${PREFIX}"
+
+          echo "Enviando index.html, sw.js e manifest com no-cache para ${TARGET_URI}..."
+          
+          # index.html
+          aws s3 cp dist/index.html "${TARGET_URI}index.html" \
+            --cache-control "no-cache, no-store, must-revalidate" \
+            --content-type "text/html"
+
+          if [ -n "$PREFIX" ]; then
+            CLEAN_PREFIX="${PREFIX%/}"
+            aws s3 cp dist/index.html "s3://${{ secrets.AWS_S3_BUCKET }}/${CLEAN_PREFIX}" \
+              --cache-control "no-cache, no-store, must-revalidate" \
+              --content-type "text/html"
+            aws s3api put-object \
+              --bucket "${{ secrets.AWS_S3_BUCKET }}" \
+              --key "${CLEAN_PREFIX}/" \
+              --body dist/index.html \
+              --content-type "text/html" \
+              --cache-control "no-cache, no-store, must-revalidate"
+          fi
+
+          # sw.js
+          aws s3 cp dist/sw.js "${TARGET_URI}sw.js" \
+            --cache-control "no-cache, no-store, must-revalidate" \
+            --content-type "application/javascript"
+
+          # manifest.webmanifest
+          aws s3 cp dist/manifest.webmanifest "${TARGET_URI}manifest.webmanifest" \
+            --cache-control "no-cache, no-store, must-revalidate" \
+            --content-type "application/manifest+json"
+
+          # workbox script
+          if compgen -G "dist/workbox-*.js" > /dev/null; then
+            for f in dist/workbox-*.js; do
+              filename=$(basename "$f")
+              aws s3 cp "$f" "${TARGET_URI}${filename}" \
+                --cache-control "no-cache, no-store, must-revalidate" \
+                --content-type "application/javascript"
+            done
+          fi
+
+      - name: Invalidate CloudFront Cache
+        if: ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID != '' }}
+        run: |
+          PREFIX="${{ secrets.AWS_S3_PREFIX }}"
+          INVALIDATION_PATH="/*"
+          if [ -n "$PREFIX" ]; then
+            INVALIDATION_PATH="/${PREFIX}*"
+          fi
+
+          echo "Criando invalidação no CloudFront para ${INVALIDATION_PATH}..."
+          aws cloudfront create-invalidation \
+            --distribution-id "${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }}" \
+            --paths "${INVALIDATION_PATH}"

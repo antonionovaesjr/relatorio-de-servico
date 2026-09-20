@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Check, MapPin, User, Calendar, FileText, Ban, Navigation, Loader2 } from 'lucide-react';
+import { ArrowLeft, Check, MapPin, User, Calendar, Clock, FileText, Ban, Navigation, Loader2 } from 'lucide-react';
 import { db } from '../../db/db';
-import { todayDateString, deriveMonthKeyFromDate } from '../../utils/date';
+import { todayDateString, deriveMonthKeyFromDate, suggestVisitTime } from '../../utils/date';
 import { triggerHaptic } from '../../utils/haptics';
 import { useTranslation } from '../../i18n/I18nContext';
 import { getCurrentCoordinates, reverseGeocode, getGoogleMapsUrl, getGeolocationErrorMessage } from '../../utils/geolocation';
@@ -25,6 +25,7 @@ export const RevisitModal: React.FC<RevisitModalProps> = ({ isOpen, onClose, onS
   const [locationStatus, setLocationStatus] = useState<string | null>(null);
 
   const [scheduledDate, setScheduledDate] = useState(() => todayDateString());
+  const [scheduledTime, setScheduledTime] = useState(() => suggestVisitTime());
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -94,6 +95,7 @@ export const RevisitModal: React.FC<RevisitModalProps> = ({ isOpen, onClose, onS
         latitude,
         longitude,
         scheduledDate: scheduledDate || undefined,
+        scheduledTime: scheduledTime || undefined,
         notes: notes.trim(),
         isCompleted: false,
         createdAt: new Date().toISOString(),
@@ -254,18 +256,70 @@ export const RevisitModal: React.FC<RevisitModalProps> = ({ isOpen, onClose, onS
             />
           </div>
 
-          {/* 📅 Data prevista */}
-          <div>
-            <label className="flex items-center gap-1.5 text-xs font-bold text-[#111B1F] dark:text-[#CBD5E1] mb-1">
-              <Calendar className="w-3.5 h-3.5 text-[#001E62] dark:text-[#60A5FA]" />
-              <span>{t('revisit.scheduledDate')}</span>
-            </label>
-            <input
-              type="date"
-              value={scheduledDate}
-              onChange={(e) => setScheduledDate(e.target.value)}
-              className="w-full text-xs bg-[#F0F2F5] dark:bg-[#0B1320] text-[#111B1F] dark:text-[#F8FAFC] px-3.5 py-2.5 rounded-xl border border-[#E1E1E1] dark:border-[#25364E] focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6]"
-            />
+          {/* 📅 Data e Horário Previstos */}
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="flex items-center gap-1.5 text-xs font-bold text-[#111B1F] dark:text-[#CBD5E1] mb-1">
+                <Calendar className="w-3.5 h-3.5 text-[#001E62] dark:text-[#60A5FA]" />
+                <span>{t('revisit.scheduledDate')}</span>
+              </label>
+              <input
+                type="date"
+                value={scheduledDate}
+                onChange={(e) => setScheduledDate(e.target.value)}
+                className="w-full text-xs bg-[#F0F2F5] dark:bg-[#0B1320] text-[#111B1F] dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E1E1E1] dark:border-[#25364E] focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6]"
+              />
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="flex items-center gap-1.5 text-xs font-bold text-[#111B1F] dark:text-[#CBD5E1]">
+                  <Clock className="w-3.5 h-3.5 text-[#001E62] dark:text-[#60A5FA]" />
+                  <span>{t('revisit.scheduledTime')}</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic(6);
+                    setScheduledTime(suggestVisitTime());
+                  }}
+                  className="text-[10px] text-[#001E62] dark:text-[#93C5FD] font-semibold hover:underline"
+                  title={t('revisit.suggestTimeHint')}
+                >
+                  {t('revisit.suggest')}
+                </button>
+              </div>
+              <input
+                type="time"
+                value={scheduledTime}
+                onChange={(e) => setScheduledTime(e.target.value)}
+                className="w-full text-xs bg-[#F0F2F5] dark:bg-[#0B1320] text-[#111B1F] dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E1E1E1] dark:border-[#25364E] focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6]"
+              />
+            </div>
+          </div>
+
+          {/* Atalhos rápidos de horário */}
+          <div className="flex items-center gap-1.5 flex-wrap -mt-1">
+            <span className="text-[10px] text-[#5C6B7E] dark:text-[#94A3B8] font-medium">
+              {t('revisit.quickHours')}:
+            </span>
+            {['09:30', '10:00', '11:00', '14:30', '16:00'].map((timeOption) => (
+              <button
+                key={timeOption}
+                type="button"
+                onClick={() => {
+                  triggerHaptic(5);
+                  setScheduledTime(timeOption);
+                }}
+                className={`text-[10px] px-2 py-0.5 rounded-md font-mono transition-colors border ${
+                  scheduledTime === timeOption
+                    ? 'bg-[#001E62] text-white dark:bg-[#2563EB] border-[#001E62] dark:border-[#3B82F6] font-bold'
+                    : 'bg-[#F0F2F5] dark:bg-[#0B1320] text-[#5C6B7E] dark:text-[#CBD5E1] border-[#E1E1E1] dark:border-[#25364E] hover:border-[#001E62]/40'
+                }`}
+              >
+                {timeOption}
+              </button>
+            ))}
           </div>
 
           {/* 📝 Notas (opcional) */}

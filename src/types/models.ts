@@ -72,6 +72,7 @@ export interface ReturnVisit {
   publication?: string; // Publicação deixada
   notes: string; // Anotações gerais
   scheduledDate?: string; // "YYYY-MM-DD"
+  scheduledTime?: string; // "HH:mm" (horário agendado, ex: "10:30")
   isCompleted: boolean;
   createdAt: string;
   updatedAt: string;

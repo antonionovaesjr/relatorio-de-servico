@@ -13,8 +13,8 @@ import {
   ChevronUp,
   Navigation,
   Loader2,
+  Clock,
 } from 'lucide-react';
-
 
 import { db } from '../../db/db';
 import {
@@ -23,6 +23,7 @@ import {
   calculateServiceYearFromDate,
   formatMinutesToHHMM,
   parseHHMMToMinutes,
+  suggestVisitTime,
 } from '../../utils/date';
 import { triggerHaptic } from '../../utils/haptics';
 import { getCurrentCoordinates, reverseGeocode, getGoogleMapsUrl, getGeolocationErrorMessage } from '../../utils/geolocation';
@@ -53,6 +54,7 @@ export const RegisterView: React.FC = () => {
 
   const [revisitTopic, setRevisitTopic] = useState('');
   const [revisitLastDate, setRevisitLastDate] = useState(() => todayDateString());
+  const [revisitScheduledTime, setRevisitScheduledTime] = useState(() => suggestVisitTime());
   const [revisitPublication, setRevisitPublication] = useState('');
   const [revisitNotes, setRevisitNotes] = useState('');
 
@@ -174,6 +176,8 @@ export const RegisterView: React.FC = () => {
       longitude: revisitLng,
       topic: revisitTopic.trim() || undefined,
       lastVisitDate: revisitLastDate || todayDateString(),
+      scheduledDate: revisitLastDate || todayDateString(),
+      scheduledTime: revisitScheduledTime || undefined,
       publication: revisitPublication.trim() || undefined,
       notes: revisitNotes.trim(),
       isCompleted: false,
@@ -193,6 +197,7 @@ export const RegisterView: React.FC = () => {
     setRevisitLat(undefined);
     setRevisitLng(undefined);
     setRevisitTopic('');
+    setRevisitScheduledTime(suggestVisitTime());
     setRevisitPublication('');
     setRevisitNotes('');
   };
@@ -528,23 +533,23 @@ export const RegisterView: React.FC = () => {
               />
             </div>
 
+            <div>
+              <label className="block text-xs font-semibold text-[#657484] dark:text-[#CBD5E1] mb-1">
+                Assunto Tratado
+              </label>
+              <input
+                type="text"
+                value={revisitTopic}
+                onChange={(e) => setRevisitTopic(e.target.value)}
+                placeholder="Sobre o Reino..."
+                className="w-full bg-[#F0F2F5] dark:bg-[#0B1320] text-slate-900 dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E9EDEF] dark:border-[#25364E] text-sm focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6]"
+              />
+            </div>
+
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="block text-xs font-semibold text-[#657484] dark:text-[#CBD5E1] mb-1">
-                  Assunto Tratado
-                </label>
-                <input
-                  type="text"
-                  value={revisitTopic}
-                  onChange={(e) => setRevisitTopic(e.target.value)}
-                  placeholder="Sobre o Reino..."
-                  className="w-full bg-[#F0F2F5] dark:bg-[#0B1320] text-slate-900 dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E9EDEF] dark:border-[#25364E] text-sm focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-[#657484] dark:text-[#CBD5E1] mb-1">
-                  Data da Visita
+                  Data Prevista
                 </label>
                 <input
                   type="date"
@@ -553,6 +558,56 @@ export const RegisterView: React.FC = () => {
                   className="w-full bg-[#F0F2F5] dark:bg-[#0B1320] text-slate-900 dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E9EDEF] dark:border-[#25364E] text-sm focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6]"
                 />
               </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="flex items-center gap-1 text-xs font-semibold text-[#657484] dark:text-[#CBD5E1]">
+                    <Clock className="w-3.5 h-3.5 text-[#001E62] dark:text-[#60A5FA]" />
+                    <span>Horário</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic(5);
+                      setRevisitScheduledTime(suggestVisitTime());
+                    }}
+                    className="text-[10px] text-[#001E62] dark:text-[#93C5FD] font-semibold hover:underline"
+                    title="Sugerir horário"
+                  >
+                    Sugerir
+                  </button>
+                </div>
+                <input
+                  type="time"
+                  value={revisitScheduledTime}
+                  onChange={(e) => setRevisitScheduledTime(e.target.value)}
+                  className="w-full bg-[#F0F2F5] dark:bg-[#0B1320] text-slate-900 dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E9EDEF] dark:border-[#25364E] text-sm focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6]"
+                />
+              </div>
+            </div>
+
+            {/* Atalhos rápidos de horário */}
+            <div className="flex items-center gap-1.5 flex-wrap -mt-1">
+              <span className="text-[10px] text-[#657484] dark:text-[#94A3B8] font-medium">
+                Atalhos:
+              </span>
+              {['09:30', '10:00', '11:00', '14:30', '16:00'].map((timeOption) => (
+                <button
+                  key={timeOption}
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic(5);
+                    setRevisitScheduledTime(timeOption);
+                  }}
+                  className={`text-[10px] px-2 py-0.5 rounded-md font-mono transition-colors border ${
+                    revisitScheduledTime === timeOption
+                      ? 'bg-[#001E62] text-white dark:bg-[#2563EB] border-[#001E62] dark:border-[#3B82F6] font-bold'
+                      : 'bg-[#F0F2F5] dark:bg-[#0B1320] text-[#657484] dark:text-[#CBD5E1] border-[#E9EDEF] dark:border-[#25364E]'
+                  }`}
+                >
+                  {timeOption}
+                </button>
+              ))}
             </div>
 
             <div>

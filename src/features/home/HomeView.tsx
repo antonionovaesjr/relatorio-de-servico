@@ -508,9 +508,10 @@ export const HomeView: React.FC<HomeViewProps> = ({ onGoToMonth, onGoToVisits })
                   📍 {formatFullAddress(nextVisit)}
                 </p>
               )}
-              {nextVisit.scheduledDate && (
+              {(nextVisit.scheduledDate || nextVisit.scheduledTime) && (
                 <p className="text-[11px] text-[#001E62] dark:text-[#93C5FD] font-semibold mt-1">
-                  {t('home.scheduledDate', { date: nextVisit.scheduledDate })}
+                  {nextVisit.scheduledDate && t('home.scheduledDate', { date: nextVisit.scheduledDate })}
+                  {nextVisit.scheduledTime && ` ${t('revisit.atTime')} ${nextVisit.scheduledTime}`}
                 </p>
               )}
             </div>

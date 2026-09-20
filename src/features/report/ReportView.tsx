@@ -23,6 +23,7 @@ import {
   calculateServiceYearFromDate,
   formatMinutesToHHMM,
   parseHHMMToMinutes,
+  formatDailyDate,
 } from '../../utils/date';
 import { triggerHaptic } from '../../utils/haptics';
 import { useTranslation } from '../../i18n/I18nContext';
@@ -493,6 +494,16 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
                       {formatFullAddress(visit) && (
                         <p className="text-[11px] text-[#5C6B7E] dark:text-[#94A3B8] mt-0.5">
                           📍 {formatFullAddress(visit)}
+                        </p>
+                      )}
+
+                      {(visit.scheduledDate || visit.scheduledTime) && (
+                        <p className="text-[11px] font-semibold text-[#001E62] dark:text-[#93C5FD] mt-0.5 flex items-center gap-1">
+                          <span>📅</span>
+                          <span>
+                            {visit.scheduledDate && formatDailyDate(visit.scheduledDate, locale)}
+                            {visit.scheduledTime && ` ${t('revisit.atTime')} ${visit.scheduledTime}`}
+                          </span>
                         </p>
                       )}
 

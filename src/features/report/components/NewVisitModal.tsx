@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { X, User, Check, MapPin, Navigation, Loader2 } from 'lucide-react';
+import { X, User, Check, MapPin, Navigation, Loader2, Clock } from 'lucide-react';
 
 import { triggerHaptic } from '../../../utils/haptics';
-import { todayDateString } from '../../../utils/date';
+import { todayDateString, suggestVisitTime } from '../../../utils/date';
 import { getCurrentCoordinates, reverseGeocode, getGoogleMapsUrl, getGeolocationErrorMessage } from '../../../utils/geolocation';
 
 interface NewVisitModalProps {
@@ -19,6 +19,7 @@ interface NewVisitModalProps {
     topic?: string;
     publication?: string;
     scheduledDate?: string;
+    scheduledTime?: string;
     notes?: string;
   }) => Promise<void>;
 }
@@ -37,6 +38,7 @@ export const NewVisitModal: React.FC<NewVisitModalProps> = ({ isOpen, onClose, o
   const [topic, setTopic] = useState('');
   const [publication, setPublication] = useState('');
   const [scheduledDate, setScheduledDate] = useState(() => todayDateString());
+  const [scheduledTime, setScheduledTime] = useState(() => suggestVisitTime());
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -91,6 +93,7 @@ export const NewVisitModal: React.FC<NewVisitModalProps> = ({ isOpen, onClose, o
         topic: topic.trim() || undefined,
         publication: publication.trim() || undefined,
         scheduledDate: scheduledDate || undefined,
+        scheduledTime: scheduledTime || undefined,
         notes: notes.trim() || undefined,
       });
       setContactName('');
@@ -103,6 +106,7 @@ export const NewVisitModal: React.FC<NewVisitModalProps> = ({ isOpen, onClose, o
       setTopic('');
       setPublication('');
       setScheduledDate(todayDateString());
+      setScheduledTime(suggestVisitTime());
       setNotes('');
       onClose();
     } finally {
@@ -275,6 +279,57 @@ export const NewVisitModal: React.FC<NewVisitModalProps> = ({ isOpen, onClose, o
                 onChange={(e) => setScheduledDate(e.target.value)}
                 className="w-full text-xs bg-[#F0F2F5] dark:bg-[#0B1320] text-slate-900 dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E9EDEF] dark:border-[#25364E] focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6]"
               />
+            </div>
+          </div>
+
+          {/* Horário previsto e sugestão */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="flex items-center gap-1.5 text-xs font-semibold text-[#657484] dark:text-[#CBD5E1]">
+                <Clock className="w-3.5 h-3.5 text-[#001E62] dark:text-[#60A5FA]" />
+                <span>Horário previsto</span>
+              </label>
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic(5);
+                  setScheduledTime(suggestVisitTime());
+                }}
+                className="text-[10px] text-[#001E62] dark:text-[#93C5FD] font-semibold hover:underline"
+                title="Sugerir horário"
+              >
+                Sugerir
+              </button>
+            </div>
+            <input
+              type="time"
+              value={scheduledTime}
+              onChange={(e) => setScheduledTime(e.target.value)}
+              className="w-full text-xs bg-[#F0F2F5] dark:bg-[#0B1320] text-slate-900 dark:text-[#F8FAFC] px-3 py-2 rounded-xl border border-[#E9EDEF] dark:border-[#25364E] focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6]"
+            />
+
+            {/* Atalhos rápidos de horário */}
+            <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
+              <span className="text-[10px] text-[#657484] dark:text-[#94A3B8] font-medium">
+                Atalhos:
+              </span>
+              {['09:30', '10:00', '11:00', '14:30', '16:00'].map((timeOption) => (
+                <button
+                  key={timeOption}
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic(5);
+                    setScheduledTime(timeOption);
+                  }}
+                  className={`text-[10px] px-2 py-0.5 rounded-md font-mono transition-colors border ${
+                    scheduledTime === timeOption
+                      ? 'bg-[#001E62] text-white dark:bg-[#2563EB] border-[#001E62] dark:border-[#3B82F6] font-bold'
+                      : 'bg-[#F0F2F5] dark:bg-[#0B1320] text-[#657484] dark:text-[#CBD5E1] border-[#E9EDEF] dark:border-[#25364E]'
+                  }`}
+                >
+                  {timeOption}
+                </button>
+              ))}
             </div>
           </div>
 

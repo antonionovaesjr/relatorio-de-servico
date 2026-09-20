@@ -118,4 +118,32 @@ export function tryParseTimeToMinutes(value: string): { minutes: number; isValid
   return { minutes: 0, isValid: false };
 }
 
+/**
+ * Sugere um horário apropriado para revisita:
+ * Arredonda o horário atual para o bloco de 30 minutos mais próximo (ex: 10:14 -> 10:30, 10:45 -> 11:00).
+ * Se for fora do horário comercial/campo (antes das 08:00 ou após 21:00), sugere 10:00.
+ */
+export function suggestVisitTime(): string {
+  const now = new Date();
+  let hours = now.getHours();
+  const minutes = now.getMinutes();
+
+  if (hours < 8 || hours >= 21) {
+    return '10:00';
+  }
+
+  let roundedMinutes = 0;
+  if (minutes < 15) {
+    roundedMinutes = 0;
+  } else if (minutes < 45) {
+    roundedMinutes = 30;
+  } else {
+    roundedMinutes = 0;
+    hours = (hours + 1) % 24;
+  }
+
+  return `${String(hours).padStart(2, '0')}:${String(roundedMinutes).padStart(2, '0')}`;
+}
+
+
 

@@ -98,6 +98,10 @@ export const HelpView: React.FC = () => {
             <span className="text-[#001E62] dark:text-[#60A5FA] font-bold">•</span>
             <span><strong className="text-[#111B1F] dark:text-white">{t('help.reportsPoint2Title')}</strong> {t('help.reportsPoint2Text')}</span>
           </li>
+          <li className="flex items-start gap-2">
+            <span className="text-[#001E62] dark:text-[#60A5FA] font-bold">•</span>
+            <span><strong className="text-[#111B1F] dark:text-white">{t('help.reportsPoint3Title')}</strong> {t('help.reportsPoint3Text')}</span>
+          </li>
         </ul>
       </section>
 

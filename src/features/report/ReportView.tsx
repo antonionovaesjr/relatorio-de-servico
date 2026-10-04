@@ -10,6 +10,13 @@ import {
   CheckCircle2,
   Circle,
   Plus,
+  Award,
+  HelpCircle,
+  X,
+  GraduationCap,
+  Building2,
+  HeartPulse,
+  AlertCircle,
 } from 'lucide-react';
 
 import { db, useUserSettings } from '../../db/db';
@@ -48,6 +55,7 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
   // Modais
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isNewRevisitModalOpen, setIsNewRevisitModalOpen] = useState(false);
+  const [isCreditInfoModalOpen, setIsCreditInfoModalOpen] = useState(false);
 
   // Edição de Lançamento Diário
   const [editingDailyEntry, setEditingDailyEntry] = useState<DailyEntry | null>(null);
@@ -107,9 +115,16 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
   // Consulta do relatório salvo do mês
   const dbReport = useLiveQuery(() => db.monthlyReports.get(currentMonthKey), [currentMonthKey]);
 
+  // Regras de pioneiro / publicador
+  const isPublisher = settings.role === 'publisher';
+  const isRegularPioneer = settings.role === 'regular_pioneer';
+
   // Relatório ativo mesclado
   const report: MonthlyReport = useMemo(() => {
-    const computedHoursDecimal = Math.round((totalDailyMinutes / 60) * 10) / 10;
+    const creditHours = dbReport?.creditHours ?? 0;
+    const creditMinutes = isRegularPioneer && creditHours ? creditHours * 60 : 0;
+    const computedGrandTotalMinutes = totalDailyMinutes + creditMinutes;
+    const computedHoursDecimal = Math.round((computedGrandTotalMinutes / 60) * 10) / 10;
     return {
       monthKey: currentMonthKey,
       serviceYear: calculateServiceYear(currentMonthKey),
@@ -118,9 +133,22 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
       notes: dbReport?.notes ?? '',
       isAuxiliaryPioneer: dbReport?.isAuxiliaryPioneer ?? false,
       hasReducedRequirement: dbReport?.hasReducedRequirement ?? false,
+      creditHours: dbReport?.creditHours ?? 0,
       updatedAt: dbReport?.updatedAt ?? new Date().toISOString(),
     };
-  }, [currentMonthKey, dbReport, computedStudies, totalDailyMinutes]);
+  }, [currentMonthKey, dbReport, computedStudies, totalDailyMinutes, isRegularPioneer]);
+
+  // Total geral de minutos (campo + crédito se pioneiro regular)
+  const grandTotalMinutes = useMemo(() => {
+    const creditMinutes = isRegularPioneer && report.creditHours ? report.creditHours * 60 : 0;
+    return totalDailyMinutes + creditMinutes;
+  }, [totalDailyMinutes, isRegularPioneer, report.creditHours]);
+
+  const handleUpdateCreditHours = async (newVal: number) => {
+    triggerHaptic(8);
+    const valid = Math.max(0, isNaN(newVal) ? 0 : Math.round(newVal * 10) / 10);
+    await handleUpdateReport({ creditHours: valid });
+  };
 
   // Revisitas do mês
   const returnVisits = useLiveQuery(
@@ -166,9 +194,6 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
     };
     await db.monthlyReports.put(updated);
   };
-
-  // Regras de pioneiro / publicador
-  const isPublisher = settings.role === 'publisher';
 
   // Excluir Lançamento Diário
   const handleDeleteDaily = async (id?: number) => {
@@ -361,6 +386,114 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
             </label>
           </div>
         )}
+
+        {/* 🎖️ Campo de Crédito de Horas */}
+        <div className="pt-2.5 border-t border-[#E1E1E1]/60 dark:border-[#1F2E44] mt-2 space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <Award className="w-4 h-4 text-[#001E62] dark:text-[#60A5FA]" />
+              <label className="text-xs font-bold text-[#111B1F] dark:text-[#F8FAFC]">
+                {t('reports.creditHoursLabel')}
+              </label>
+            </div>
+
+            {/* Botão de Ajuda: Quando usar o crédito de horas? */}
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic(8);
+                setIsCreditInfoModalOpen(true);
+              }}
+              className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#001E62] dark:text-[#60A5FA] hover:underline transition-colors"
+              title={t('reports.creditHoursHelpBtn')}
+            >
+              <HelpCircle className="w-3.5 h-3.5" />
+              <span>{t('reports.creditHoursHelpBtn')}</span>
+            </button>
+          </div>
+
+          {/* Campo de Entrada de Crédito */}
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <input
+                type="number"
+                min="0"
+                step="1"
+                disabled={!isRegularPioneer}
+                value={isRegularPioneer ? (report.creditHours || '') : ''}
+                onChange={(e) => {
+                  const val = parseFloat(e.target.value);
+                  handleUpdateCreditHours(isNaN(val) ? 0 : val);
+                }}
+                placeholder={isRegularPioneer ? t('reports.creditHoursPlaceholder') : '0h'}
+                className={`w-full text-xs font-semibold px-3 py-2 rounded-xl border transition-all ${
+                  isRegularPioneer
+                    ? 'bg-[#F0F2F5] dark:bg-[#0B1320] text-[#111B1F] dark:text-[#F8FAFC] border-[#E1E1E1] dark:border-[#25364E] focus:outline-none focus:ring-2 focus:ring-[#001E62] dark:focus:ring-[#3B82F6]'
+                    : 'bg-slate-100 dark:bg-slate-900/60 text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-800 cursor-not-allowed opacity-75'
+                }`}
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#5C6B7E] dark:text-[#94A3B8]">
+                h
+              </span>
+            </div>
+
+            {/* Botões rápidos quando habilitado para Pioneiro Regular */}
+            {isRegularPioneer && (
+              <div className="flex items-center gap-1">
+                {[15, 30].map((hours) => (
+                  <button
+                    key={hours}
+                    type="button"
+                    onClick={() => handleUpdateCreditHours((report.creditHours || 0) + hours)}
+                    className="px-2.5 py-1.5 rounded-lg bg-[#E8EEF8] dark:bg-[#172554] text-[#001E62] dark:text-[#93C5FD] hover:bg-[#001E62] hover:text-white dark:hover:bg-[#1E3A8A] text-xs font-bold border border-[#001E62]/20 dark:border-[#3B82F6]/40 transition-colors active:scale-95"
+                    title={`+${hours} horas`}
+                  >
+                    +{hours}h
+                  </button>
+                ))}
+                {(report.creditHours ?? 0) > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => handleUpdateCreditHours(0)}
+                    className="px-2 py-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-xs font-semibold border border-rose-200 dark:border-rose-900 transition-colors active:scale-95"
+                    title={t('common.reset')}
+                  >
+                    {t('common.reset')}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Aviso se NÃO for pioneiro regular */}
+          {!isRegularPioneer && (
+            <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              <div className="text-[11px] text-amber-800 dark:text-amber-300 leading-tight">
+                <span className="font-bold">{t('reports.creditHoursOnlyRegular')}.</span>{' '}
+                <span className="opacity-90">{t('reports.creditHoursOnlyRegularHint')}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Resumo de Horas com Crédito se for pioneiro regular e tiver crédito */}
+          {isRegularPioneer && (report.creditHours ?? 0) > 0 && (
+            <div className="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-[#E8EEF8] dark:bg-[#172554] border border-[#001E62]/20 dark:border-[#3B82F6]/30 text-center animate-fade-in">
+              <div>
+                <div className="text-[10px] text-[#5C6B7E] dark:text-[#93C5FD] font-semibold uppercase">{t('reports.fieldHoursLabel')}</div>
+                <div className="text-xs font-mono font-bold text-[#111B1F] dark:text-white">{formatMinutesToHHMM(totalDailyMinutes)}</div>
+              </div>
+              <div>
+                <div className="text-[10px] text-[#5C6B7E] dark:text-[#93C5FD] font-semibold uppercase">{t('reports.creditHoursSummary')}</div>
+                <div className="text-xs font-mono font-bold text-[#001E62] dark:text-[#60A5FA]">+{report.creditHours}h</div>
+              </div>
+              <div>
+                <div className="text-[10px] text-[#5C6B7E] dark:text-[#93C5FD] font-semibold uppercase">{t('reports.totalHoursSummary')}</div>
+                <div className="text-xs font-mono font-extrabold text-[#001E62] dark:text-[#93C5FD]">{formatMinutesToHHMM(grandTotalMinutes)}</div>
+              </div>
+            </div>
+          )}
+        </div>
       </section>
 
       {/* 📄 REGISTROS DO MÊS */}
@@ -562,7 +695,9 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
         onClose={() => setIsShareModalOpen(false)}
         monthKey={currentMonthKey}
         bibleStudies={report.bibleStudies || 0}
-        hoursFormatted={formatMinutesToHHMM(totalDailyMinutes)}
+        hoursFormatted={formatMinutesToHHMM(grandTotalMinutes)}
+        fieldHoursFormatted={formatMinutesToHHMM(totalDailyMinutes)}
+        creditHours={report.creditHours || 0}
         isAuxiliaryPioneer={report.isAuxiliaryPioneer}
         hasReducedRequirement={report.hasReducedRequirement}
         isPublisher={isPublisher}
@@ -571,6 +706,107 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
         notes={report.notes}
         publisherName={settings.publisherName}
       />
+
+      {/* ℹ️ Modal Explicativo: Quando usar o crédito de horas? */}
+      <ModalPortal isOpen={isCreditInfoModalOpen}>
+        <div className="fixed inset-0 z-[110] w-screen h-[100dvh] flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-xs animate-modal-backdrop overflow-y-auto">
+          <div className="bg-white dark:bg-[#111A29] rounded-2xl w-full max-w-md border-2 border-[#001E62] dark:border-[#3B82F6] shadow-2xl overflow-hidden flex flex-col max-h-[90dvh] my-auto animate-modal-card">
+            {/* Cabeçalho */}
+            <header className="h-14 bg-[#001E62] text-white px-4 flex items-center justify-between shrink-0 shadow-sm">
+              <div className="flex items-center gap-2">
+                <Award className="w-5 h-5 text-white/90" />
+                <h3 className="text-sm font-bold tracking-tight">
+                  {t('reports.creditModalTitle')}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic(8);
+                  setIsCreditInfoModalOpen(false);
+                }}
+                className="p-1.5 rounded-full hover:bg-white/10 text-white/80 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </header>
+
+            {/* Conteúdo Explicativo */}
+            <div className="p-4 space-y-3.5 overflow-y-auto flex-1 text-xs leading-relaxed text-[#111B1F] dark:text-[#E2E8F0]">
+              <p className="font-semibold text-slate-700 dark:text-[#CBD5E1]">
+                {t('reports.creditModalIntro')}
+              </p>
+
+              {/* Tópico 1: Escola */}
+              <div className="p-3 rounded-xl bg-[#F0F2F5] dark:bg-[#0B1320] border border-[#E1E1E1] dark:border-[#1F2E44] flex items-start gap-2.5">
+                <div className="p-1.5 rounded-lg bg-[#001E62]/10 dark:bg-[#3B82F6]/20 text-[#001E62] dark:text-[#60A5FA] shrink-0">
+                  <GraduationCap className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-[#001E62] dark:text-[#93C5FD]">
+                    {t('reports.creditModalSchoolTitle')}
+                  </h4>
+                  <p className="text-[#5C6B7E] dark:text-[#94A3B8] mt-0.5">
+                    {t('reports.creditModalSchoolDesc')}
+                  </p>
+                </div>
+              </div>
+
+              {/* Tópico 2: LDC / Betel */}
+              <div className="p-3 rounded-xl bg-[#F0F2F5] dark:bg-[#0B1320] border border-[#E1E1E1] dark:border-[#1F2E44] flex items-start gap-2.5">
+                <div className="p-1.5 rounded-lg bg-[#001E62]/10 dark:bg-[#3B82F6]/20 text-[#001E62] dark:text-[#60A5FA] shrink-0">
+                  <Building2 className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-[#001E62] dark:text-[#93C5FD]">
+                    {t('reports.creditModalLdcTitle')}
+                  </h4>
+                  <p className="text-[#5C6B7E] dark:text-[#94A3B8] mt-0.5">
+                    {t('reports.creditModalLdcDesc')}
+                  </p>
+                </div>
+              </div>
+
+              {/* Tópico 3: Enfermidade / Imprevistos */}
+              <div className="p-3 rounded-xl bg-[#F0F2F5] dark:bg-[#0B1320] border border-[#E1E1E1] dark:border-[#1F2E44] flex items-start gap-2.5">
+                <div className="p-1.5 rounded-lg bg-[#001E62]/10 dark:bg-[#3B82F6]/20 text-[#001E62] dark:text-[#60A5FA] shrink-0">
+                  <HeartPulse className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-[#001E62] dark:text-[#93C5FD]">
+                    {t('reports.creditModalHealthTitle')}
+                  </h4>
+                  <p className="text-[#5C6B7E] dark:text-[#94A3B8] mt-0.5">
+                    {t('reports.creditModalHealthDesc')}
+                  </p>
+                </div>
+              </div>
+
+              {/* Aviso da Comissão de Serviço */}
+              <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                <p className="text-amber-900 dark:text-amber-200 font-semibold text-[11px] leading-tight">
+                  {t('reports.creditModalSecretaryNotice')}
+                </p>
+              </div>
+
+              {/* Botão Fechar */}
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic(8);
+                    setIsCreditInfoModalOpen(false);
+                  }}
+                  className="w-full py-2.5 px-4 rounded-xl bg-[#001E62] hover:bg-[#001545] dark:bg-[#1D4ED8] hover:dark:bg-[#2563EB] text-white text-xs font-bold transition-all active:scale-95"
+                >
+                  {t('common.close')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ModalPortal>
 
       {/* Modal de Nova Revisita Independente */}
       <RevisitModal

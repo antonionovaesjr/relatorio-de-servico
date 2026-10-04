@@ -49,15 +49,31 @@ export const HomeView: React.FC<HomeViewProps> = ({ onGoToMonth, onGoToVisits })
     return allReports.filter((r) => r.serviceYear === currentServiceYear);
   }, [allReports, currentServiceYear]);
 
-  // Total de minutos de ministério no ano de serviço
+  // Relatório do mês atual vigente
+  const currentMonthReport = useLiveQuery(
+    () => db.monthlyReports.get(currentMonthKey),
+    [currentMonthKey]
+  );
+
+  // Identificação dos papéis teocráticos
+  const isRegularPioneer = settings.role === 'regular_pioneer';
+  const isAuxiliaryPioneer =
+    settings.role === 'auxiliary_pioneer' || Boolean(currentMonthReport?.isAuxiliaryPioneer);
+
+  // Total de minutos de ministério no ano de serviço (inclui créditos para pioneiro regular)
   const totalMinutes = useMemo(() => {
     const dailyMins = serviceYearDailyEntries.reduce(
       (acc, cur) => acc + (cur.hours * 60 + (cur.minutes || 0)),
       0
     );
     const reportsMins = serviceYearReports.reduce((acc, cur) => acc + Math.round((cur.hours ?? 0) * 60), 0);
-    return Math.max(dailyMins, reportsMins);
-  }, [serviceYearDailyEntries, serviceYearReports]);
+    const baseMins = Math.max(dailyMins, reportsMins);
+    if (isRegularPioneer) {
+      const creditMins = serviceYearReports.reduce((acc, cur) => acc + (cur.creditHours || 0) * 60, 0);
+      return baseMins + creditMins;
+    }
+    return baseMins;
+  }, [serviceYearDailyEntries, serviceYearReports, isRegularPioneer]);
 
   // Total de estudos no ano de serviço
   const totalStudies = useMemo(() => {
@@ -78,12 +94,6 @@ export const HomeView: React.FC<HomeViewProps> = ({ onGoToMonth, onGoToVisits })
     return days.size;
   }, [serviceYearDailyEntries]);
 
-  // Relatório do mês atual vigente
-  const currentMonthReport = useLiveQuery(
-    () => db.monthlyReports.get(currentMonthKey),
-    [currentMonthKey]
-  );
-
   // Registros do mês atual vigente
   const currentMonthDailyEntries = useMemo(() => {
     return serviceYearDailyEntries.filter((e) => e.monthKey === currentMonthKey);
@@ -95,13 +105,12 @@ export const HomeView: React.FC<HomeViewProps> = ({ onGoToMonth, onGoToVisits })
       0
     );
     const repMins = Math.round((currentMonthReport?.hours ?? 0) * 60);
-    return Math.max(dailyMins, repMins);
-  }, [currentMonthDailyEntries, currentMonthReport]);
-
-  // Identificação dos papéis teocráticos
-  const isRegularPioneer = settings.role === 'regular_pioneer';
-  const isAuxiliaryPioneer =
-    settings.role === 'auxiliary_pioneer' || Boolean(currentMonthReport?.isAuxiliaryPioneer);
+    const baseMins = Math.max(dailyMins, repMins);
+    if (isRegularPioneer && currentMonthReport?.creditHours) {
+      return baseMins + (currentMonthReport.creditHours * 60);
+    }
+    return baseMins;
+  }, [currentMonthDailyEntries, currentMonthReport, isRegularPioneer]);
 
   // Metas do Pioneiro Regular (Ano de serviço)
   const regularMonthlyTarget = settings.regularPioneerConfig?.monthlyTargetHours || 50;
@@ -160,11 +169,14 @@ export const HomeView: React.FC<HomeViewProps> = ({ onGoToMonth, onGoToVisits })
         if (repMins > map[r.monthKey]) {
           map[r.monthKey] = repMins;
         }
+        if (isRegularPioneer && r.creditHours) {
+          map[r.monthKey] += r.creditHours * 60;
+        }
       }
     });
 
     return map;
-  }, [monthsInServiceYear, serviceYearDailyEntries, serviceYearReports]);
+  }, [monthsInServiceYear, serviceYearDailyEntries, serviceYearReports, isRegularPioneer]);
 
   // Máximo de minutos para escala das barras
   const maxBarMinutes = useMemo(() => {

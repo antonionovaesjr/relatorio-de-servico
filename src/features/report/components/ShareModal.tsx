@@ -11,11 +11,13 @@ interface ShareModalProps {
   monthKey: string;
   bibleStudies: number;
   hoursFormatted: string;
+  fieldHoursFormatted?: string;
+  creditHours?: number;
   isAuxiliaryPioneer: boolean;
   hasReducedRequirement?: boolean;
   isPublisher: boolean;
   userRole?: string;
-  onUpdateReport?: (patch: { isAuxiliaryPioneer?: boolean; hasReducedRequirement?: boolean }) => void;
+  onUpdateReport?: (patch: { isAuxiliaryPioneer?: boolean; hasReducedRequirement?: boolean; creditHours?: number }) => void;
   notes?: string;
   publisherName?: string;
 }
@@ -26,6 +28,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   monthKey,
   bibleStudies,
   hoursFormatted,
+  fieldHoursFormatted,
+  creditHours,
   isAuxiliaryPioneer,
   hasReducedRequirement = false,
   isPublisher,
@@ -87,6 +91,13 @@ export const ShareModal: React.FC<ShareModalProps> = ({
     if (isPioneer) {
       lines.push(t('share.template.hours', { hours: hoursFormatted }));
 
+      if (userRole === 'regular_pioneer' && creditHours && creditHours > 0) {
+        if (fieldHoursFormatted) {
+          lines.push(t('share.template.fieldHours', { field: fieldHoursFormatted }));
+        }
+        lines.push(t('share.template.creditHours', { credit: `${creditHours}h` }));
+      }
+
       if (isPublisher && localIsAux) {
         lines.push(localHasReduced ? t('share.template.auxYesSpecial') : t('share.template.auxYes'));
       } else if (userRole === 'auxiliary_pioneer') {
@@ -109,6 +120,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({
     publisherName,
     bibleStudies,
     hoursFormatted,
+    fieldHoursFormatted,
+    creditHours,
     isPublisher,
     userRole,
     localIsAux,

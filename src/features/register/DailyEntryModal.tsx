@@ -278,6 +278,7 @@ export const DailyEntryModal: React.FC<DailyEntryModalProps> = ({
                         notes: monthReport?.notes ?? '',
                         isAuxiliaryPioneer: isAux,
                         hasReducedRequirement: isAux ? (monthReport?.hasReducedRequirement ?? false) : false,
+                        creditHours: monthReport?.creditHours ?? 0,
                         updatedAt: new Date().toISOString(),
                       });
                     }}

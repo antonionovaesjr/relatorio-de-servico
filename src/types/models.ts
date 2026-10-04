@@ -54,6 +54,7 @@ export interface MonthlyReport {
   notes: string;
   isAuxiliaryPioneer: boolean; // Condição A (Publicador marcando aux no mês)
   hasReducedRequirement: boolean; // Condição B (50% do requisito)
+  creditHours?: number; // Crédito de horas para pioneiro regular (ex: 15, 30)
   updatedAt: string;
 }
 

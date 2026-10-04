@@ -166,6 +166,7 @@ export const ptBR = {
     special50: '50% (mês especial)',
     enablesAux: '(ativa pioneiro aux.)',
     copyButton: 'Copiar Texto do Relatório',
+    shareBtn: 'Compartilhar',
     copiedButton: 'Texto Copiado!',
     copiedNotice: 'Texto copiado com sucesso! Agora cole no app desejado.',
     template: {

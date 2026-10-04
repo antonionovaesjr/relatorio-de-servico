@@ -168,6 +168,7 @@ export const enUS: typeof ptBR = {
     special50: '50% (special campaign)',
     enablesAux: '(enables aux. pioneer)',
     copyButton: 'Copy Report Text',
+    shareBtn: 'Share',
     copiedButton: 'Text Copied!',
     copiedNotice: 'Report text copied to clipboard! Now paste it into your desired app.',
     template: {

@@ -1,15 +1,17 @@
 import React, { useState, useMemo } from 'react';
-import { X, Check, Copy, ClipboardCheck } from 'lucide-react';
+import { X, Check, Copy, ClipboardCheck, Share2 } from 'lucide-react';
 import { triggerHaptic } from '../../../utils/haptics';
 import { formatMonthLabel } from '../../../utils/date';
 import { useTranslation } from '../../../i18n/I18nContext';
 import { ModalPortal } from '../../../components/common/ModalPortal';
+import type { DailyEntry } from '../../../types/models';
 
 interface ShareModalProps {
   isOpen: boolean;
   onClose: () => void;
   monthKey: string;
   bibleStudies: number;
+  dailyEntries?: DailyEntry[];
   hoursFormatted: string;
   fieldHoursFormatted?: string;
   creditHours?: number;
@@ -27,6 +29,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   onClose,
   monthKey,
   bibleStudies,
+  dailyEntries,
   hoursFormatted,
   fieldHoursFormatted,
   creditHours,
@@ -74,7 +77,14 @@ export const ShareModal: React.FC<ShareModalProps> = ({
     onUpdateReport?.({ isAuxiliaryPioneer: newAux, hasReducedRequirement: checked });
   };
 
-  // Compilação do texto exato para copiar
+  // Agregação iterativa dos registros diários no IndexedDB com .reduce() e Math.max()
+  const aggregatedStudies = useMemo(() => {
+    const dailySum = (dailyEntries || []).reduce((acc, cur) => acc + (cur.bibleStudies || 0), 0);
+    const dailyMax = (dailyEntries || []).reduce((acc, cur) => Math.max(acc, cur.bibleStudies || 0), 0);
+    return Math.max(bibleStudies || 0, dailySum, dailyMax);
+  }, [bibleStudies, dailyEntries]);
+
+  // Compilação do texto exato para copiar ou partilhar
   const previewText = useMemo(() => {
     const isPioneer =
       userRole === 'regular_pioneer' ||
@@ -85,7 +95,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
       t('share.template.title', { month: uppercaseMonth }),
       '────────────────────────────────',
       publisherName?.trim() ? t('share.template.publisher', { name: publisherName.trim() }) : '',
-      t('share.template.bibleStudies', { count: bibleStudies }),
+      t('share.template.bibleStudies', { count: aggregatedStudies }),
     ].filter(Boolean);
 
     if (isPioneer) {
@@ -118,7 +128,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   }, [
     uppercaseMonth,
     publisherName,
-    bibleStudies,
+    aggregatedStudies,
     hoursFormatted,
     fieldHoursFormatted,
     creditHours,
@@ -129,6 +139,24 @@ export const ShareModal: React.FC<ShareModalProps> = ({
     notes,
     t,
   ]);
+
+  const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+
+  const handleShare = async () => {
+    triggerHaptic(12);
+    if (canShare) {
+      try {
+        await navigator.share({
+          title: t('share.copyTitle', { month: formattedMonth }),
+          text: previewText,
+        });
+        return;
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === 'AbortError') return;
+      }
+    }
+    await handleCopy();
+  };
 
   if (!isOpen) return null;
 
@@ -243,11 +271,26 @@ export const ShareModal: React.FC<ShareModalProps> = ({
           )}
 
           {/* Botões */}
-          <div className="flex gap-2 pt-2">
+          <div className="flex flex-wrap gap-2 pt-2">
+            {canShare && (
+              <button
+                type="button"
+                onClick={handleShare}
+                className="flex-1 py-3 px-3 rounded-xl bg-[#001E62] hover:bg-[#001545] text-white dark:bg-[#1D4ED8] dark:hover:bg-[#2563EB] dark:border dark:border-[#60A5FA]/40 text-xs font-bold shadow-sm active:scale-95 transition-all flex items-center justify-center gap-1.5"
+              >
+                <Share2 className="w-4 h-4" />
+                <span>{t('share.shareBtn') || 'Compartilhar'}</span>
+              </button>
+            )}
+
             <button
               type="button"
               onClick={handleCopy}
-              className="flex-1 py-3 px-4 rounded-xl bg-[#001E62] hover:bg-[#001545] text-white dark:bg-[#1D4ED8] dark:hover:bg-[#2563EB] dark:border dark:border-[#60A5FA]/40 text-xs font-bold shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2"
+              className={`flex-1 py-3 px-3 rounded-xl text-xs font-bold shadow-sm active:scale-95 transition-all flex items-center justify-center gap-1.5 ${
+                canShare
+                  ? 'border border-[#001E62]/40 dark:border-[#3B82F6]/60 text-[#001E62] dark:text-[#93C5FD] bg-[#E8EEF8] dark:bg-[#172554] hover:bg-[#D9E4F5]'
+                  : 'bg-[#001E62] hover:bg-[#001545] text-white dark:bg-[#1D4ED8] dark:hover:bg-[#2563EB] dark:border dark:border-[#60A5FA]/40'
+              }`}
             >
               {copiedFeedback ? (
                 <>
@@ -265,7 +308,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="py-3 px-4 rounded-xl border border-[#657484]/30 dark:border-[#25364E] text-[#657484] dark:text-[#CBD5E1] text-xs font-semibold hover:bg-slate-100 dark:hover:bg-[#162236] transition-colors active:scale-95"
+              className="py-3 px-3.5 rounded-xl border border-[#657484]/30 dark:border-[#25364E] text-[#657484] dark:text-[#CBD5E1] text-xs font-semibold hover:bg-slate-100 dark:hover:bg-[#162236] transition-colors active:scale-95"
             >
               {t('common.close')}
             </button>

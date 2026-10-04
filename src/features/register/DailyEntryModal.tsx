@@ -270,10 +270,15 @@ export const DailyEntryModal: React.FC<DailyEntryModalProps> = ({
                     onChange={async (e) => {
                       triggerHaptic(8);
                       const isAux = e.target.checked;
+                      const monthEntries = await db.dailyEntries.where('monthKey').equals(selectedMonthKey).toArray();
+                      const dailySum = monthEntries.reduce((acc, cur) => acc + (cur.bibleStudies || 0), 0);
+                      const dailyMax = monthEntries.reduce((acc, cur) => Math.max(acc, cur.bibleStudies || 0), 0);
+                      const existingStudies = Math.max(monthReport?.bibleStudies ?? 0, dailySum, dailyMax);
+
                       await db.monthlyReports.put({
                         monthKey: selectedMonthKey,
                         serviceYear: calculateServiceYearFromDate(date),
-                        bibleStudies: monthReport?.bibleStudies ?? 0,
+                        bibleStudies: existingStudies,
                         hours: monthReport?.hours ?? 0,
                         notes: monthReport?.notes ?? '',
                         isAuxiliaryPioneer: isAux,

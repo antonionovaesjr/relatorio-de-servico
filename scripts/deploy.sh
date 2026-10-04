@@ -59,7 +59,10 @@ if [ -n "$AWS_CLOUDFRONT_DISTRIBUTION_ID" ]; then
 fi
 echo "=========================================================="
 
-# 1. Compilação de Produção
+# 1. Pipeline de Testes e Compilação
+echo "🧪 Executando pipeline de testes locais (npm test)..."
+npm test
+
 echo "📦 Compilando aplicação PWA (npm run build)..."
 npm run build
 

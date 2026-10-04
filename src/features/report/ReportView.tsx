@@ -108,8 +108,10 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
   }, [dailyEntries]);
 
   const computedStudies = useMemo(() => {
-    if (!dailyEntries) return 0;
-    return dailyEntries.reduce((acc, cur) => acc + (cur.bibleStudies || 0), 0);
+    if (!dailyEntries || dailyEntries.length === 0) return 0;
+    const sum = dailyEntries.reduce((acc, cur) => acc + (cur.bibleStudies || 0), 0);
+    const max = dailyEntries.reduce((acc, cur) => Math.max(acc, cur.bibleStudies || 0), 0);
+    return Math.max(sum, max);
   }, [dailyEntries]);
 
   // Consulta do relatório salvo do mês
@@ -125,10 +127,11 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
     const creditMinutes = isRegularPioneer && creditHours ? creditHours * 60 : 0;
     const computedGrandTotalMinutes = totalDailyMinutes + creditMinutes;
     const computedHoursDecimal = Math.round((computedGrandTotalMinutes / 60) * 10) / 10;
+    const effectiveStudies = Math.max(dbReport?.bibleStudies ?? 0, computedStudies);
     return {
       monthKey: currentMonthKey,
       serviceYear: calculateServiceYear(currentMonthKey),
-      bibleStudies: dbReport?.bibleStudies ?? computedStudies,
+      bibleStudies: effectiveStudies,
       hours: dbReport?.hours ?? computedHoursDecimal,
       notes: dbReport?.notes ?? '',
       isAuxiliaryPioneer: dbReport?.isAuxiliaryPioneer ?? false,
@@ -695,6 +698,7 @@ export const ReportView: React.FC<ReportViewProps> = ({ initialMonthKey }) => {
         onClose={() => setIsShareModalOpen(false)}
         monthKey={currentMonthKey}
         bibleStudies={report.bibleStudies || 0}
+        dailyEntries={dailyEntries || []}
         hoursFormatted={formatMinutesToHHMM(grandTotalMinutes)}
         fieldHoursFormatted={formatMinutesToHHMM(totalDailyMinutes)}
         creditHours={report.creditHours || 0}

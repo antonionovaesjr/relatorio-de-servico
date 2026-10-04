@@ -168,6 +168,7 @@ export const esES: typeof ptBR = {
     special50: '50% (mes especial)',
     enablesAux: '(activa precursor aux.)',
     copyButton: 'Copiar Texto del Informe',
+    shareBtn: 'Compartir',
     copiedButton: '¡Texto Copiado!',
     copiedNotice: '¡Texto copiado con éxito! Ahora pégalo en la aplicación que desees.',
     template: {

@@ -365,8 +365,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onGoToMonth, onGoToVisits })
               )}
               <span
                 data-testid="monthly-badge"
-                className="px-2 py-0.5 rounded-md text-[11px] text-white font-bold"
-                style={{ backgroundColor: '#6E1996' }}
+                className="text-[#001E62] dark:text-[#60A5FA] bg-[#E8EEF8] dark:bg-[#162234] px-2 py-0.5 rounded-md text-[11px] font-bold"
               >
                 Mês: {isRegularPioneer ? regularMonthlyCalculation.progressPercent : auxMonthlyCalculation.progressPercent}%
               </span>
@@ -425,38 +424,40 @@ export const HomeView: React.FC<HomeViewProps> = ({ onGoToMonth, onGoToVisits })
               </div>
             )}
 
-            {/* 2. BARRA DE PROGRESSO MENSAL (Pioneiro Regular ou Auxiliar — Cor Exata #6E1996) */}
+            {/* 2. BARRA DE PROGRESSO MENSAL */}
             <div
               data-testid="monthly-progress-section"
-              className="bg-[#FAF5FC] dark:bg-[#150D1C] p-3 rounded-xl border border-[#E9D5F5] dark:border-[#381B45] space-y-2"
+              className="bg-[#F4F6F9] dark:bg-[#0B1320] p-3 rounded-xl border border-[#DDE3EA] dark:border-[#202E42] space-y-2"
             >
               <div className="flex items-center justify-between text-[11px] font-bold">
-                <span className="flex items-center gap-1.5" style={{ color: '#6E1996' }}>
-                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#6E1996' }} />
+                <span className="text-[#001E62] dark:text-[#93C5FD] flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#001E62] dark:bg-[#3B82F6]" />
                   <span>
                     🗓️ {isRegularPioneer ? t('home.progressMonthly') : t('home.progressAux')} ({isRegularPioneer ? regularMonthlyTarget : auxMonthlyTargetHours}h)
                   </span>
                 </span>
-                <span className="font-bold" style={{ color: '#6E1996' }}>
+                <span className="text-[#001E62] dark:text-[#60A5FA]">
                   {isRegularPioneer ? regularMonthlyCalculation.progressPercent : auxMonthlyCalculation.progressPercent}%
                 </span>
               </div>
 
-              {/* Barra de Progresso Mensal (#6E1996) */}
-              <div className="h-3.5 w-full bg-[#F3E8FA] dark:bg-[#23122E] rounded-full overflow-hidden p-0.5 border border-[#6E1996]/20 dark:border-[#6E1996]/30">
+              {/* Barra de Progresso Mensal — Cor #6E1996 exclusivamente para Pioneiro Regular */}
+              <div className="h-3.5 w-full bg-[#E8EEF8] dark:bg-[#162234] rounded-full overflow-hidden p-0.5 border border-[#001E62]/20 dark:border-[#25364E]">
                 <div
                   data-testid="monthly-progress-bar"
-                  className="h-full rounded-full transition-all duration-500 ease-out"
+                  className={`h-full rounded-full transition-all duration-500 ease-out ${
+                    isRegularPioneer ? '' : 'bg-[#001E62] dark:bg-[#3B82F6]'
+                  }`}
                   style={{
                     width: `${isRegularPioneer ? regularMonthlyCalculation.progressPercent : auxMonthlyCalculation.progressPercent}%`,
-                    backgroundColor: '#6E1996',
+                    ...(isRegularPioneer ? { backgroundColor: '#6E1996' } : {}),
                   }}
                 />
               </div>
 
               <div className="pt-0.5 space-y-1 text-xs text-[#0A111E] dark:text-[#F8FAFC]">
                 <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-1.5 font-semibold text-[11px]" style={{ color: '#6E1996' }}>
+                  <span className="flex items-center gap-1.5 text-[#001E62] dark:text-[#93C5FD] font-semibold text-[11px]">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     <span>{t('home.completedCount', { time: formatMinutesToHHMM(currentMonthMinutes) })}</span>
                   </span>
@@ -477,7 +478,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onGoToMonth, onGoToVisits })
                   </span>
                 </div>
 
-                <div className="pt-1.5 border-t border-[#E9D5F5] dark:border-[#381B45] flex items-center justify-between text-[11px] text-[#5C6B7E] dark:text-[#CBD5E1]">
+                <div className="pt-1.5 border-t border-[#DDE3EA] dark:border-[#202E42] flex items-center justify-between text-[11px] text-[#5C6B7E] dark:text-[#CBD5E1]">
                   <span>📏 {t('home.monthGoal')}</span>
                   <span className="font-bold text-[#0A111E] dark:text-[#F8FAFC]">
                     {isRegularPioneer

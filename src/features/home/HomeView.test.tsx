@@ -81,4 +81,51 @@ describe('HomeView - Dual-Bar Progress Card (Injeção fake-indexeddb)', () => {
     expect(remainingLabel).toBeTruthy();
     expect(remainingLabel.textContent).toContain('10:00 faltam');
   });
+
+  it('deve usar azul padrão para Pioneiro Auxiliar (garantindo que #6E1996 é exclusivo do Pioneiro Regular)', async () => {
+    const currentMonthKey = getMonthKey(new Date());
+    const serviceYear = calculateServiceYear(currentMonthKey);
+
+    // 1. Injeção de estado no fake-indexeddb: Pioneiro Auxiliar
+    const userSettings: UserSettings = {
+      id: 'current_user',
+      publisherName: 'Antonio Novaes',
+      role: 'auxiliary_pioneer',
+      theme: 'system',
+      language: 'pt-BR',
+      revisitNotificationDays: 3,
+      scheduledBackupEnabled: true,
+      updatedAt: new Date().toISOString(),
+    };
+    await db.settings.put(userSettings);
+
+    const monthReport: MonthlyReport = {
+      monthKey: currentMonthKey,
+      serviceYear,
+      hours: 18,
+      bibleStudies: 1,
+      notes: '',
+      isAuxiliaryPioneer: true,
+      hasReducedRequirement: false,
+      creditHours: 0,
+      updatedAt: new Date().toISOString(),
+    };
+    await db.monthlyReports.put(monthReport);
+
+    render(
+      <I18nProvider language="pt-BR">
+        <HomeView onGoToMonth={() => {}} onGoToVisits={() => {}} />
+      </I18nProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('progress-card')).toBeTruthy();
+    });
+
+    const monthlyBar = screen.getByTestId('monthly-progress-bar');
+    // Deve conter classe azul padrão e NÃO conter style de background-color #6E1996
+    expect(monthlyBar.className).toContain('bg-[#001E62]');
+    const styleAttr = monthlyBar.getAttribute('style') || '';
+    expect(styleAttr.toLowerCase()).not.toContain('#6e1996');
+  });
 });

@@ -29,55 +29,18 @@ export function isDevEnvironment(): boolean {
 export function applyEnvironmentVisuals(): void {
   if (typeof document === 'undefined') return;
 
-  const isDev = isDevEnvironment();
   const root = document.documentElement;
+  root.classList.remove('env-dev');
 
-  if (isDev) {
-    root.classList.add('env-dev');
-
-    // Troca o Favicon para Vermelho em todos os links de favicon
-    const favicons = document.querySelectorAll<HTMLLinkElement>('link[rel="icon"]');
-    const devFaviconUrl = `${import.meta.env.BASE_URL}favicon-dev.svg`;
-    favicons.forEach((fav) => {
-      fav.href = devFaviconUrl;
-    });
-
-    // Se não houver link rel="icon", cria um
-    if (favicons.length === 0) {
-      const link = document.createElement('link');
-      link.rel = 'icon';
-      link.type = 'image/svg+xml';
-      link.href = devFaviconUrl;
-      document.head.appendChild(link);
-    }
-
-    // Atualiza theme-color para Roxo na barra do navegador móvel
-    const themeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
-    if (themeColor) {
-      themeColor.content = '#6B21A8';
-    }
-
-    // Prefixa título com [DEV]
-    if (!document.title.startsWith('[DEV]')) {
-      document.title = `[DEV] ${document.title}`;
-    }
-  } else {
-    root.classList.remove('env-dev');
-
-    // Mantém o Favicon original Midnight Blue
-    const favicons = document.querySelectorAll<HTMLLinkElement>('link[rel="icon"]');
-    const prodFaviconUrl = `${import.meta.env.BASE_URL}favicon.svg`;
-    favicons.forEach((fav) => {
-      fav.href = prodFaviconUrl;
-    });
-
-    const themeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
-    if (themeColor) {
-      themeColor.content = '#001E62';
-    }
-
-    if (document.title.startsWith('[DEV] ')) {
-      document.title = document.title.replace('[DEV] ', '');
-    }
+  // Mantém sempre o tema Midnight Blue original (#001E62)
+  const themeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+  if (themeColor) {
+    themeColor.content = '#001E62';
   }
+
+  const favicons = document.querySelectorAll<HTMLLinkElement>('link[rel="icon"]');
+  const prodFaviconUrl = `${import.meta.env.BASE_URL}favicon.svg`;
+  favicons.forEach((fav) => {
+    fav.href = prodFaviconUrl;
+  });
 }

@@ -60,18 +60,53 @@ describe('HelpView - FAQ por Designação', () => {
     expect(screen.getByText('Por que a tela Início não exibe barra de meta de horas?')).toBeTruthy();
   });
 
-  it('deve exibir todos os pontos atualizados no card Registro & Correção', () => {
+  it('deve exibir o card Registro e Correção com histórico cronológico a partir de f623326', () => {
     render(
       <I18nProvider language="pt-BR">
         <HelpView />
       </I18nProvider>
     );
 
-    expect(screen.getByText('Lançamento de Horas & Cronômetro:')).toBeTruthy();
-    expect(screen.getByText('Correção Rápida:')).toBeTruthy();
-    expect(screen.getByText('🎖️ Crédito de Horas (Pioneiro Regular):')).toBeTruthy();
-    expect(screen.getByText('📍 Revisitas com GPS Automático:')).toBeTruthy();
-    expect(screen.getByText('⏰ Sugestão Inteligente de Horário:')).toBeTruthy();
-    expect(screen.getByText('🗺️ Navegação no Google Maps:')).toBeTruthy();
+    const changelogSection = screen.getByTestId('changelog-section');
+    expect(changelogSection).toBeTruthy();
+    expect(screen.getByText('Desde 19/09/2026')).toBeTruthy();
+    expect(screen.getByText('#f623326')).toBeTruthy();
+    expect(screen.getByText('Visual Modernizado e Suporte a Novos Idiomas')).toBeTruthy();
+    expect(screen.getByText(/O aplicativo recebeu um novo layout limpo/)).toBeTruthy();
+  });
+
+  it('deve filtrar itens por Melhoria e por Correção no card Registro e Correção', () => {
+    render(
+      <I18nProvider language="pt-BR">
+        <HelpView />
+      </I18nProvider>
+    );
+
+    // Filtro de Correções
+    const fixFilterBtn = screen.getByText(/🛠️ Correções/);
+    fireEvent.click(fixFilterBtn);
+
+    // Deve exibir itens de correção
+    expect(screen.getByText('Harmonização de Cores nas Bordas das Telas')).toBeTruthy();
+    expect(screen.getByText('Contagem Correta de Estudos Bíblicos ao Compartilhar')).toBeTruthy();
+    expect(screen.getByText('Preservação do Tema Original Midnight Blue')).toBeTruthy();
+
+    // Não deve exibir melhorias quando filtrado por correções
+    expect(screen.queryByText('Visual Modernizado e Suporte a Novos Idiomas')).toBeNull();
+
+    // Filtro de Melhorias
+    const improvementFilterBtn = screen.getByText(/✨ Melhorias/);
+    fireEvent.click(improvementFilterBtn);
+
+    expect(screen.getByText('Visual Modernizado e Suporte a Novos Idiomas')).toBeTruthy();
+    expect(screen.getByText('Barra Dupla de Progresso na Tela Inicial (Dual-Bar)')).toBeTruthy();
+    expect(screen.queryByText('Harmonização de Cores nas Bordas das Telas')).toBeNull();
+
+    // Voltar para Todas (específico do changelog: Todas (11))
+    const allFilterBtn = screen.getByText(/^Todas \(\d+\)$/);
+    fireEvent.click(allFilterBtn);
+
+    expect(screen.getByText('Visual Modernizado e Suporte a Novos Idiomas')).toBeTruthy();
+    expect(screen.getByText('Harmonização de Cores nas Bordas das Telas')).toBeTruthy();
   });
 });

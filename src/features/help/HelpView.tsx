@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   HelpCircle,
   Home,
-  PlusCircle,
   ClipboardList,
   User,
   ShieldCheck,
@@ -17,11 +16,13 @@ import {
   MapPin,
   HardDrive,
   CheckCircle2,
+  History,
 } from 'lucide-react';
 import { useTranslation } from '../../i18n/I18nContext';
 import { triggerHaptic } from '../../utils/haptics';
 
 type FaqCategory = 'all' | 'publisher' | 'auxiliary' | 'regular' | 'general';
+type ChangelogFilter = 'all' | 'improvement' | 'fix';
 
 interface FaqItem {
   id: string;
@@ -33,10 +34,20 @@ interface FaqItem {
   answer: React.ReactNode;
 }
 
+interface ChangeLogItem {
+  id: string;
+  date: string;
+  type: 'improvement' | 'fix';
+  title: string;
+  description: string;
+  commitHash: string;
+}
+
 export const HelpView: React.FC = () => {
   const { t } = useTranslation();
   const [selectedCategory, setSelectedCategory] = useState<FaqCategory>('all');
   const [openFaqId, setOpenFaqId] = useState<string | null>('pub-1');
+  const [changelogFilter, setChangelogFilter] = useState<ChangelogFilter>('all');
 
   const faqItems: FaqItem[] = [
     // 👤 PUBLICADOR
@@ -314,8 +325,103 @@ export const HelpView: React.FC = () => {
     },
   ];
 
+  const changelogItems: ChangeLogItem[] = [
+    {
+      id: 'c-1',
+      date: '19/09/2026',
+      type: 'improvement',
+      title: 'Visual Modernizado e Suporte a Novos Idiomas',
+      description: 'O aplicativo recebeu um novo layout limpo, agradável e intuitivo, além de suporte completo para 3 idiomas: Português, Inglês e Espanhol.',
+      commitHash: 'f623326',
+    },
+    {
+      id: 'c-2',
+      date: '20/09/2026',
+      type: 'improvement',
+      title: 'Instalação Oficial como Aplicativo (PWA)',
+      description: 'Agora o aplicativo pode ser adicionado à tela inicial do celular com o ícone oficial limpo (sem mini-logo do navegador), funcionando em tela cheia como um aplicativo instalado nativamente.',
+      commitHash: 'ed44766',
+    },
+    {
+      id: 'c-3',
+      date: '20/09/2026',
+      type: 'improvement',
+      title: 'Localização por GPS e Busca de Endereço Automática',
+      description: 'Ao cadastrar uma revisita, basta tocar no botão de GPS para capturar as coordenadas e preencher automaticamente a rua e a cidade, com integração direta para abrir o Google Maps.',
+      commitHash: 'ed44766',
+    },
+    {
+      id: 'c-4',
+      date: '20/09/2026',
+      type: 'improvement',
+      title: 'Agendamento de Horário com Sugestão Inteligente',
+      description: 'Inclusão de campo de horário previsto nas revisitas com o botão "Sugerir", que calcula horários redondos convenientes (ex: 10:30, 15:00) e atalhos rápidos para combinar o retorno.',
+      commitHash: '423b07f',
+    },
+    {
+      id: 'c-5',
+      date: '20/09/2026',
+      type: 'fix',
+      title: 'Harmonização de Cores nas Bordas das Telas',
+      description: 'Substituição de bordas cinzas e brancas que não combinavam com o layout nas janelas de revisita e confirmação pelas cores oficiais do tema do aplicativo.',
+      commitHash: '20c9fbe',
+    },
+    {
+      id: 'c-6',
+      date: '20/09/2026',
+      type: 'fix',
+      title: 'Centralização Perfeita das Telas e Modais',
+      description: 'As janelas de revisitas e confirmações agora abrem no centro exato da tela do aparelho, tanto na vertical quanto na horizontal, sem ficarem cortadas ao rolar a página.',
+      commitHash: '3315afb',
+    },
+    {
+      id: 'c-7',
+      date: '04/10/2026',
+      type: 'improvement',
+      title: 'Campo de Crédito de Horas para Pioneiro Regular',
+      description: 'Criado na aba Registro o campo de crédito de horas com atalhos (+15h, +30h, Zerar) e janela de orientação teocrática explicando quando aplicar o crédito (Escola de Pioneiro, LDC, Betel temporário ou casos especiais com os anciãos).',
+      commitHash: 'd7f108b',
+    },
+    {
+      id: 'c-8',
+      date: '04/10/2026',
+      type: 'fix',
+      title: 'Contagem Correta de Estudos Bíblicos ao Compartilhar',
+      description: 'Correção de uma falha onde o texto mensal gerava "Total de estudos: 0" ao compartilhar mesmo com estudos lançados no mês. Agora todos os estudos registrados são somados e exportados corretamente.',
+      commitHash: '041442d',
+    },
+    {
+      id: 'c-9',
+      date: '11/10/2026',
+      type: 'improvement',
+      title: 'Barra Dupla de Progresso na Tela Inicial (Dual-Bar)',
+      description: 'A tela Início passou a exibir duas barras simultâneas para o pioneiro regular: progresso anual no ano de serviço e progresso mensal na cor azul oceano (#0B4C8C), indicando com clareza quantas horas faltam para a meta do mês (ex: "10:00 faltam").',
+      commitHash: 'abe6ebc / 7b2043f',
+    },
+    {
+      id: 'c-10',
+      date: '11/10/2026',
+      type: 'fix',
+      title: 'Preservação do Tema Original Midnight Blue',
+      description: 'Garantido que o tema clássico azul Midnight Blue seja preservado em todo o aplicativo sem alterações indesejadas, mantendo cores especiais restritas estritamente à barra mensal do pioneiro regular.',
+      commitHash: 'e34ee34',
+    },
+    {
+      id: 'c-11',
+      date: '11/10/2026',
+      type: 'improvement',
+      title: 'Tira-Dúvidas (FAQ) por Designação Teocrática',
+      description: 'Criação da seção de perguntas frequentes na aba Ajuda com respostas diretas, didáticas e acolhedoras para Publicadores, Pioneiros Auxiliares e Pioneiros Regulares.',
+      commitHash: '414b28f',
+    },
+  ];
+
   const filteredFaqs = faqItems.filter(
     (item) => selectedCategory === 'all' || item.category === selectedCategory
+  );
+
+  const filteredChangelog = changelogItems.filter(
+    (item) => changelogFilter === 'all' || item.type === changelogFilter
   );
 
   const toggleFaq = (id: string) => {
@@ -473,12 +579,8 @@ export const HelpView: React.FC = () => {
         </div>
       </section>
 
-      {/* 🧭 GUIA RÁPIDO DAS ABAS DO APLICATIVO */}
+      {/* 🧭 GUIA RÁPIDO & HISTÓRICO DAS TELAS */}
       <div className="space-y-3 pt-2">
-        <h2 className="text-xs font-bold text-[#5C6B7E] dark:text-[#94A3B8] uppercase tracking-wider px-1">
-          Referência Rápida de Telas
-        </h2>
-
         {/* 🏠 INÍCIO */}
         <section className="bg-white dark:bg-[#111A29] rounded-xl p-4 border border-[#DDE3EA] dark:border-[#1F2E44] shadow-sm space-y-2">
           <div className="flex items-center gap-2 pb-2 border-b border-[#DDE3EA] dark:border-[#1F2E44]">
@@ -507,40 +609,111 @@ export const HelpView: React.FC = () => {
           </ul>
         </section>
 
-        {/* ✏️ REGISTRO */}
-        <section className="bg-white dark:bg-[#111A29] rounded-xl p-4 border border-[#DDE3EA] dark:border-[#1F2E44] shadow-sm space-y-2">
-          <div className="flex items-center gap-2 pb-2 border-b border-[#DDE3EA] dark:border-[#1F2E44]">
-            <PlusCircle className="w-4 h-4 text-[#001E62] dark:text-[#93C5FD]" />
-            <h3 className="text-xs font-bold text-[#001E62] dark:text-[#93C5FD] tracking-wider uppercase">
-              {t('help.sectionRegister')}
-            </h3>
+        {/* ✏️ REGISTRO E CORREÇÃO (Histórico Cronológico de Melhorias e Correções) */}
+        <section
+          data-testid="changelog-section"
+          className="bg-white dark:bg-[#111A29] rounded-xl p-4 border border-[#DDE3EA] dark:border-[#1F2E44] shadow-sm space-y-3.5"
+        >
+          <div className="flex items-center justify-between pb-2 border-b border-[#DDE3EA] dark:border-[#1F2E44]">
+            <div className="flex items-center gap-2">
+              <History className="w-4 h-4 text-[#001E62] dark:text-[#93C5FD]" />
+              <h3 className="text-xs font-bold text-[#001E62] dark:text-[#93C5FD] tracking-wider uppercase">
+                {t('help.sectionRegister')}
+              </h3>
+            </div>
+            <span className="text-[11px] font-semibold text-[#5C6B7E] dark:text-[#CBD5E1]">
+              Desde 19/09/2026
+            </span>
           </div>
-          <ul className="space-y-1.5 text-xs text-[#0A111E] dark:text-[#E2E8F0] leading-relaxed">
-            <li className="flex items-start gap-2">
-              <span className="text-[#001E62] dark:text-[#60A5FA] font-bold">•</span>
-              <span><strong className="text-[#0A111E] dark:text-white">{t('help.registerPoint1Title')}</strong> {t('help.registerPoint1Text')}</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-[#001E62] dark:text-[#60A5FA] font-bold">•</span>
-              <span><strong className="text-[#0A111E] dark:text-white">{t('help.registerPoint2Title')}</strong> {t('help.registerPoint2Text')}</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-[#001E62] dark:text-[#60A5FA] font-bold">•</span>
-              <span><strong className="text-[#0A111E] dark:text-white">{t('help.registerPoint3Title')}</strong> {t('help.registerPoint3Text')}</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-[#001E62] dark:text-[#60A5FA] font-bold">•</span>
-              <span><strong className="text-[#0A111E] dark:text-white">{t('help.registerPoint4Title')}</strong> {t('help.registerPoint4Text')}</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-[#001E62] dark:text-[#60A5FA] font-bold">•</span>
-              <span><strong className="text-[#0A111E] dark:text-white">{t('help.registerPoint5Title')}</strong> {t('help.registerPoint5Text')}</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-[#001E62] dark:text-[#60A5FA] font-bold">•</span>
-              <span><strong className="text-[#0A111E] dark:text-white">{t('help.registerPoint6Title')}</strong> {t('help.registerPoint6Text')}</span>
-            </li>
-          </ul>
+
+          <p className="text-xs text-[#5C6B7E] dark:text-[#CBD5E1] leading-relaxed">
+            Acompanhe abaixo o histórico completo de melhorias e correções implementadas no aplicativo em ordem de data, explicadas de forma simples e direta:
+          </p>
+
+          {/* Filtros do Changelog */}
+          <div className="flex items-center gap-1.5 text-xs font-semibold">
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic(6);
+                setChangelogFilter('all');
+              }}
+              className={`px-2.5 py-1 rounded-md text-[11px] transition-colors ${
+                changelogFilter === 'all'
+                  ? 'bg-[#001E62] text-white dark:bg-[#3B82F6]'
+                  : 'bg-[#F4F6F9] dark:bg-[#162234] text-[#5C6B7E] dark:text-[#CBD5E1] hover:bg-[#E8EEF8]'
+              }`}
+            >
+              Todas ({changelogItems.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic(6);
+                setChangelogFilter('improvement');
+              }}
+              className={`px-2.5 py-1 rounded-md text-[11px] transition-colors ${
+                changelogFilter === 'improvement'
+                  ? 'bg-emerald-600 text-white'
+                  : 'bg-[#F4F6F9] dark:bg-[#162234] text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50'
+              }`}
+            >
+              ✨ Melhorias ({changelogItems.filter((i) => i.type === 'improvement').length})
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic(6);
+                setChangelogFilter('fix');
+              }}
+              className={`px-2.5 py-1 rounded-md text-[11px] transition-colors ${
+                changelogFilter === 'fix'
+                  ? 'bg-amber-600 text-white'
+                  : 'bg-[#F4F6F9] dark:bg-[#162234] text-amber-700 dark:text-amber-300 hover:bg-amber-50'
+              }`}
+            >
+              🛠️ Correções ({changelogItems.filter((i) => i.type === 'fix').length})
+            </button>
+          </div>
+
+          {/* Lista de Registros Cronológicos */}
+          <div className="space-y-2.5 pt-1">
+            {filteredChangelog.map((item) => (
+              <div
+                key={item.id}
+                className="p-3 rounded-xl border border-[#DDE3EA] dark:border-[#202E42] bg-[#F4F6F9] dark:bg-[#0B1320] space-y-1.5 transition-all"
+              >
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider ${
+                        item.type === 'improvement'
+                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800'
+                          : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-800'
+                      }`}
+                    >
+                      {item.type === 'improvement' ? 'Melhoria' : 'Correção'}
+                    </span>
+                    <span className="text-[11px] font-bold text-[#5C6B7E] dark:text-[#CBD5E1] flex items-center gap-1">
+                      <Calendar className="w-3 h-3 text-slate-400" />
+                      {item.date}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500">
+                    #{item.commitHash}
+                  </span>
+                </div>
+
+                <h4 className="text-xs font-bold text-[#0A111E] dark:text-[#F8FAFC]">
+                  {item.title}
+                </h4>
+
+                <p className="text-xs text-[#4A5568] dark:text-[#CBD5E1] leading-relaxed">
+                  {item.description}
+                </p>
+              </div>
+            ))}
+          </div>
         </section>
 
         {/* 📋 RELATÓRIO */}

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import 'fake-indexeddb/auto';
 import { db } from '../../db/db';
 import { HomeView } from './HomeView';
@@ -14,6 +14,10 @@ describe('HomeView - Dual-Bar Progress Card (Injeção fake-indexeddb)', () => {
     await db.monthlyReports.clear();
     await db.dailyEntries.clear();
     await db.returnVisits.clear();
+  });
+
+  afterEach(() => {
+    cleanup();
   });
 
   it('deve injetar estado de Pioneiro Regular com meta de 50h, 40h cumpridas e exibir "10:00 faltam" e a barra #0B4C8C', async () => {

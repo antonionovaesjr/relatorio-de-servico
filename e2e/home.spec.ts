@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Tela Início - Card de Progresso Dual-Bar', () => {
-  test('deve exibir barra anual (azul) e mensal (#6E1996) com 10:00 faltam para pioneiro regular de 50h com 40h cumpridas', async ({ page }) => {
+  test('deve exibir barra anual (azul) e mensal (#0B4C8C) com 10:00 faltam para pioneiro regular de 50h com 40h cumpridas', async ({ page }) => {
     await page.goto('/');
 
     // Injeta estado teocrático no IndexedDB
@@ -63,6 +63,6 @@ test.describe('Tela Início - Card de Progresso Dual-Bar', () => {
     await expect(remainingLabel).toContainText('10:00 faltam');
 
     const monthlyBar = page.locator('[data-testid="monthly-progress-bar"]');
-    await expect(monthlyBar).toHaveCSS('background-color', 'rgb(110, 25, 150)');
+    await expect(monthlyBar).toHaveCSS('background-color', 'rgb(11, 76, 140)');
   });
 });

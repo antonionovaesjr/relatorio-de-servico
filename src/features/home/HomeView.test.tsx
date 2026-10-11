@@ -16,7 +16,7 @@ describe('HomeView - Dual-Bar Progress Card (Injeção fake-indexeddb)', () => {
     await db.returnVisits.clear();
   });
 
-  it('deve injetar estado de Pioneiro Regular com meta de 50h, 40h cumpridas e exibir "10:00 faltam" e a barra #6E1996', async () => {
+  it('deve injetar estado de Pioneiro Regular com meta de 50h, 40h cumpridas e exibir "10:00 faltam" e a barra #0B4C8C', async () => {
     const currentMonthKey = getMonthKey(new Date());
     const serviceYear = calculateServiceYear(currentMonthKey);
 
@@ -69,12 +69,12 @@ describe('HomeView - Dual-Bar Progress Card (Injeção fake-indexeddb)', () => {
     const annualBar = screen.getByTestId('annual-progress-bar');
     expect(annualBar.className).toContain('bg-[#001E62]');
 
-    // 6. Validação da barra mensal com cor exata #6E1996
+    // 6. Validação da barra mensal com cor exata #0B4C8C
     const monthlySection = screen.getByTestId('monthly-progress-section');
     expect(monthlySection).toBeTruthy();
     const monthlyBar = screen.getByTestId('monthly-progress-bar');
     const styleAttr = monthlyBar.getAttribute('style') || '';
-    expect(styleAttr.toLowerCase()).toMatch(/background-color:\s*(#6e1996|rgb\(110,\s*25,\s*150\))/);
+    expect(styleAttr.toLowerCase()).toMatch(/background-color:\s*(#0b4c8c|rgb\(11,\s*76,\s*140\))/);
 
     // 7. Validação do texto correspondente a "10:00 faltam"
     const remainingLabel = screen.getByTestId('monthly-remaining-label');
@@ -82,7 +82,7 @@ describe('HomeView - Dual-Bar Progress Card (Injeção fake-indexeddb)', () => {
     expect(remainingLabel.textContent).toContain('10:00 faltam');
   });
 
-  it('deve usar azul padrão para Pioneiro Auxiliar (garantindo que #6E1996 é exclusivo do Pioneiro Regular)', async () => {
+  it('deve usar azul padrão para Pioneiro Auxiliar (garantindo que #0B4C8C é exclusivo do Pioneiro Regular)', async () => {
     const currentMonthKey = getMonthKey(new Date());
     const serviceYear = calculateServiceYear(currentMonthKey);
 
@@ -123,9 +123,9 @@ describe('HomeView - Dual-Bar Progress Card (Injeção fake-indexeddb)', () => {
     });
 
     const monthlyBar = screen.getByTestId('monthly-progress-bar');
-    // Deve conter classe azul padrão e NÃO conter style de background-color #6E1996
+    // Deve conter classe azul padrão e NÃO conter style de background-color #0B4C8C
     expect(monthlyBar.className).toContain('bg-[#001E62]');
     const styleAttr = monthlyBar.getAttribute('style') || '';
-    expect(styleAttr.toLowerCase()).not.toContain('#6e1996');
+    expect(styleAttr.toLowerCase()).not.toContain('#0b4c8c');
   });
 });

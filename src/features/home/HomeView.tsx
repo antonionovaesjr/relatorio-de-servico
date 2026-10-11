@@ -340,7 +340,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onGoToMonth, onGoToVisits })
         </div>
       </section>
 
-      {/* 🎯 PROGRESSO DA DESIGNAÇÃO — Dual-Bar (Anual Azul e Mensal #6E1996) */}
+      {/* 🎯 PROGRESSO DA DESIGNAÇÃO — Dual-Bar (Anual Azul e Mensal #0B4C8C) */}
       {(isRegularPioneer || isAuxiliaryPioneer) && (
         <section
           data-testid="progress-card"
@@ -441,7 +441,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onGoToMonth, onGoToVisits })
                 </span>
               </div>
 
-              {/* Barra de Progresso Mensal — Cor #6E1996 exclusivamente para Pioneiro Regular */}
+              {/* Barra de Progresso Mensal — Cor #0B4C8C exclusivamente para Pioneiro Regular */}
               <div className="h-3.5 w-full bg-[#E8EEF8] dark:bg-[#162234] rounded-full overflow-hidden p-0.5 border border-[#001E62]/20 dark:border-[#25364E]">
                 <div
                   data-testid="monthly-progress-bar"
@@ -450,7 +450,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onGoToMonth, onGoToVisits })
                   }`}
                   style={{
                     width: `${isRegularPioneer ? regularMonthlyCalculation.progressPercent : auxMonthlyCalculation.progressPercent}%`,
-                    ...(isRegularPioneer ? { backgroundColor: '#6E1996' } : {}),
+                    ...(isRegularPioneer ? { backgroundColor: '#0B4C8C' } : {}),
                   }}
                 />
               </div>

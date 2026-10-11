@@ -15,6 +15,7 @@ import {
   formatMonthLabel,
   getMonthKey,
   formatMinutesToHHMM,
+  calculateRemainingMonthlyTime,
 } from '../../utils/date';
 import { triggerHaptic } from '../../utils/haptics';
 import { useTranslation } from '../../i18n/I18nContext';
@@ -112,7 +113,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onGoToMonth, onGoToVisits })
     return baseMins;
   }, [currentMonthDailyEntries, currentMonthReport, isRegularPioneer]);
 
-  // Metas do Pioneiro Regular (Ano de serviço)
+  // Metas do Pioneiro Regular (Ano de serviço e Mês atual)
   const regularMonthlyTarget = settings.regularPioneerConfig?.monthlyTargetHours || 50;
   const regularAnnualTargetHours = regularMonthlyTarget * 12;
   const regularAnnualTargetMinutes = regularAnnualTargetHours * 60;
@@ -122,28 +123,31 @@ export const HomeView: React.FC<HomeViewProps> = ({ onGoToMonth, onGoToVisits })
       ? Math.min(100, Math.round((totalMinutes / regularAnnualTargetMinutes) * 100))
       : 100;
 
+  // Cálculo da Meta Mensal do Pioneiro Regular
+  const regularMonthlyCalculation = useMemo(() => {
+    return calculateRemainingMonthlyTime(regularMonthlyTarget, currentMonthMinutes);
+  }, [regularMonthlyTarget, currentMonthMinutes]);
+
   // Metas do Pioneiro Auxiliar (Baseado no mês atual vigente)
   const auxMonthlyTargetHours = currentMonthReport?.hasReducedRequirement
     ? 15
     : settings.auxiliaryPioneerConfig?.monthlyTargetHours || 30;
-  const auxMonthlyTargetMinutes = auxMonthlyTargetHours * 60;
-  const auxRemainingMinutes = Math.max(0, auxMonthlyTargetMinutes - currentMonthMinutes);
-  const auxProgressPercent =
-    auxMonthlyTargetMinutes > 0
-      ? Math.min(100, Math.round((currentMonthMinutes / auxMonthlyTargetMinutes) * 100))
-      : 100;
 
-  // Texto do componente "Faltam"
+  const auxMonthlyCalculation = useMemo(() => {
+    return calculateRemainingMonthlyTime(auxMonthlyTargetHours, currentMonthMinutes);
+  }, [auxMonthlyTargetHours, currentMonthMinutes]);
+
+  // Texto do componente "Faltam" no resumo
   const faltamDisplay = useMemo(() => {
     if (isRegularPioneer) {
-      return `${formatMinutesToHHMM(regularRemainingMinutes)} ${t('home.remaining').toLowerCase()}`;
+      return `${regularMonthlyCalculation.formattedRemaining} ${t('home.remaining').toLowerCase()}`;
     }
     if (isAuxiliaryPioneer) {
-      return `${formatMinutesToHHMM(auxRemainingMinutes)} ${t('home.remaining').toLowerCase()}`;
+      return `${auxMonthlyCalculation.formattedRemaining} ${t('home.remaining').toLowerCase()}`;
     }
     // Para publicador sem requisito: informação abreviada N/A
     return t('common.na');
-  }, [isRegularPioneer, isAuxiliaryPioneer, regularRemainingMinutes, auxRemainingMinutes, t]);
+  }, [isRegularPioneer, isAuxiliaryPioneer, regularMonthlyCalculation.formattedRemaining, auxMonthlyCalculation.formattedRemaining, t]);
 
   // Meses do ano de serviço
   const monthsInServiceYear = useMemo(() => {
@@ -336,94 +340,151 @@ export const HomeView: React.FC<HomeViewProps> = ({ onGoToMonth, onGoToVisits })
         </div>
       </section>
 
-      {/* 🎯 PROGRESSO DA DESIGNAÇÃO — Pioneiro Regular (Anual) */}
-      {isRegularPioneer && (
-        <section className="bg-white dark:bg-[#111A29] rounded-xl p-4 border border-[#DDE3EA] dark:border-[#1F2E44] shadow-sm space-y-3">
+      {/* 🎯 PROGRESSO DA DESIGNAÇÃO — Dual-Bar (Anual Azul e Mensal #6E1996) */}
+      {(isRegularPioneer || isAuxiliaryPioneer) && (
+        <section
+          data-testid="progress-card"
+          className="bg-white dark:bg-[#111A29] rounded-xl p-4 border border-[#DDE3EA] dark:border-[#1F2E44] shadow-sm space-y-3"
+        >
+          {/* Cabeçalho do Card */}
           <div className="flex items-center justify-between pb-2 border-b border-[#DDE3EA] dark:border-[#1F2E44]">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-[#001E62] dark:bg-[#60A5FA]" />
               <h2 className="text-xs font-bold text-[#001E62] dark:text-[#93C5FD] tracking-wider uppercase">
-                🎯 {t('home.progressAnnual')}
+                🎯 {t('home.progressTitle')}
               </h2>
             </div>
-            <span className="text-xs font-bold text-[#001E62] dark:text-[#60A5FA]">
-              {regularProgressPercent}%
-            </span>
+            <div className="flex items-center gap-1.5 text-xs font-bold">
+              {isRegularPioneer && (
+                <>
+                  <span className="text-[#001E62] dark:text-[#60A5FA] bg-[#E8EEF8] dark:bg-[#162234] px-2 py-0.5 rounded-md text-[11px]">
+                    Ano: {regularProgressPercent}%
+                  </span>
+                  <span className="text-[#5C6B7E] dark:text-[#64748B] text-[10px]">•</span>
+                </>
+              )}
+              <span
+                data-testid="monthly-badge"
+                className="px-2 py-0.5 rounded-md text-[11px] text-white font-bold"
+                style={{ backgroundColor: '#6E1996' }}
+              >
+                Mês: {isRegularPioneer ? regularMonthlyCalculation.progressPercent : auxMonthlyCalculation.progressPercent}%
+              </span>
+            </div>
           </div>
 
-          <div className="bg-[#F4F6F9] dark:bg-[#0B1320] p-3 rounded-xl border border-[#DDE3EA] dark:border-[#202E42] space-y-2.5">
-            {/* Barra de Progresso */}
-            <div className="h-4 w-full bg-[#E8EEF8] dark:bg-[#162234] rounded-full overflow-hidden p-0.5 border border-[#001E62]/20 dark:border-[#25364E]">
+          <div className="space-y-3">
+            {/* 1. BARRA DE PROGRESSO ANUAL (Apenas Pioneiro Regular — Cor Azul) */}
+            {isRegularPioneer && (
               <div
-                className="h-full bg-[#001E62] dark:bg-[#3B82F6] rounded-full transition-all duration-500 ease-out"
-                style={{ width: `${regularProgressPercent}%` }}
-              />
-            </div>
+                data-testid="annual-progress-section"
+                className="bg-[#F4F6F9] dark:bg-[#0B1320] p-3 rounded-xl border border-[#DDE3EA] dark:border-[#202E42] space-y-2"
+              >
+                <div className="flex items-center justify-between text-[11px] font-bold">
+                  <span className="text-[#001E62] dark:text-[#93C5FD] flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#001E62] dark:bg-[#3B82F6]" />
+                    <span>📅 {t('home.progressAnnual')} ({regularAnnualTargetHours}h)</span>
+                  </span>
+                  <span className="text-[#001E62] dark:text-[#60A5FA]">
+                    {regularProgressPercent}%
+                  </span>
+                </div>
 
-            <div className="pt-1 space-y-1 text-xs text-[#0A111E] dark:text-[#F8FAFC]">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-[#001E62] dark:text-[#93C5FD] font-semibold">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>{t('home.completedCount', { time: formatMinutesToHHMM(totalMinutes) })}</span>
+                {/* Barra de Progresso Anual (Azul) */}
+                <div className="h-3.5 w-full bg-[#E8EEF8] dark:bg-[#162234] rounded-full overflow-hidden p-0.5 border border-[#001E62]/20 dark:border-[#25364E]">
+                  <div
+                    data-testid="annual-progress-bar"
+                    className="h-full bg-[#001E62] dark:bg-[#3B82F6] rounded-full transition-all duration-500 ease-out"
+                    style={{ width: `${regularProgressPercent}%` }}
+                  />
+                </div>
+
+                <div className="pt-0.5 space-y-1 text-xs text-[#0A111E] dark:text-[#F8FAFC]">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1.5 text-[#001E62] dark:text-[#93C5FD] font-semibold text-[11px]">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>{t('home.completedCount', { time: formatMinutesToHHMM(totalMinutes) })}</span>
+                    </span>
+                    <span className="flex items-center gap-1.5 text-[#5C6B7E] dark:text-[#CBD5E1] font-semibold text-[11px]">
+                      <Hourglass className="w-3.5 h-3.5" />
+                      <span>
+                        {regularRemainingMinutes === 0
+                          ? t('home.goalReached')
+                          : t('home.remainingCount', { time: formatMinutesToHHMM(regularRemainingMinutes) })}
+                      </span>
+                    </span>
+                  </div>
+
+                  <div className="pt-1.5 border-t border-[#DDE3EA] dark:border-[#202E42] flex items-center justify-between text-[11px] text-[#5C6B7E] dark:text-[#CBD5E1]">
+                    <span>📏 {t('home.annualGoal')}</span>
+                    <span className="font-bold text-[#0A111E] dark:text-[#F8FAFC]">
+                      {regularAnnualTargetHours}:00 ({regularMonthlyTarget} {t('home.hoursPerMonth')})
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 2. BARRA DE PROGRESSO MENSAL (Pioneiro Regular ou Auxiliar — Cor Exata #6E1996) */}
+            <div
+              data-testid="monthly-progress-section"
+              className="bg-[#FAF5FC] dark:bg-[#150D1C] p-3 rounded-xl border border-[#E9D5F5] dark:border-[#381B45] space-y-2"
+            >
+              <div className="flex items-center justify-between text-[11px] font-bold">
+                <span className="flex items-center gap-1.5" style={{ color: '#6E1996' }}>
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#6E1996' }} />
+                  <span>
+                    🗓️ {isRegularPioneer ? t('home.progressMonthly') : t('home.progressAux')} ({isRegularPioneer ? regularMonthlyTarget : auxMonthlyTargetHours}h)
+                  </span>
                 </span>
-                <span className="flex items-center gap-1.5 text-[#5C6B7E] dark:text-[#CBD5E1] font-semibold">
-                  <Hourglass className="w-3.5 h-3.5" />
-                  <span>{t('home.remainingCount', { time: formatMinutesToHHMM(regularRemainingMinutes) })}</span>
+                <span className="font-bold" style={{ color: '#6E1996' }}>
+                  {isRegularPioneer ? regularMonthlyCalculation.progressPercent : auxMonthlyCalculation.progressPercent}%
                 </span>
               </div>
 
-              <div className="pt-1.5 border-t border-[#DDE3EA] dark:border-[#202E42] flex items-center justify-between text-[11px] text-[#5C6B7E] dark:text-[#CBD5E1]">
-                <span>📏 {t('home.annualGoal')}</span>
-                <span className="font-bold text-[#0A111E] dark:text-[#F8FAFC]">
-                  {regularAnnualTargetHours}:00 ({regularMonthlyTarget} {t('home.hoursPerMonth')})
-                </span>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* 🎯 PROGRESSO DO MÊS VIGENTE — Pioneiro Auxiliar */}
-      {isAuxiliaryPioneer && (
-        <section className="bg-white dark:bg-[#111A29] rounded-xl p-4 border border-[#DDE3EA] dark:border-[#1F2E44] shadow-sm space-y-3">
-          <div className="flex items-center justify-between pb-2 border-b border-[#DDE3EA] dark:border-[#1F2E44]">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#001E62] dark:bg-[#60A5FA]" />
-              <h2 className="text-xs font-bold text-[#001E62] dark:text-[#93C5FD] tracking-wider uppercase">
-                🎯 {t('home.progressAux')}
-              </h2>
-            </div>
-            <span className="text-xs font-bold text-[#001E62] dark:text-[#60A5FA]">
-              {auxProgressPercent}%
-            </span>
-          </div>
-
-          <div className="bg-[#F4F6F9] dark:bg-[#0B1320] p-3 rounded-xl border border-[#DDE3EA] dark:border-[#202E42] space-y-2.5">
-            {/* Barra de Progresso */}
-            <div className="h-4 w-full bg-[#E8EEF8] dark:bg-[#162234] rounded-full overflow-hidden p-0.5 border border-[#001E62]/20 dark:border-[#25364E]">
-              <div
-                className="h-full bg-[#001E62] dark:bg-[#3B82F6] rounded-full transition-all duration-500 ease-out"
-                style={{ width: `${auxProgressPercent}%` }}
-              />
-            </div>
-
-            <div className="pt-1 space-y-1 text-xs text-[#0A111E] dark:text-[#F8FAFC]">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-[#001E62] dark:text-[#93C5FD] font-semibold">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>{t('home.completedCount', { time: formatMinutesToHHMM(currentMonthMinutes) })}</span>
-                </span>
-                <span className="flex items-center gap-1.5 text-[#5C6B7E] dark:text-[#CBD5E1] font-semibold">
-                  <Hourglass className="w-3.5 h-3.5" />
-                  <span>{t('home.remainingCount', { time: formatMinutesToHHMM(auxRemainingMinutes) })}</span>
-                </span>
+              {/* Barra de Progresso Mensal (#6E1996) */}
+              <div className="h-3.5 w-full bg-[#F3E8FA] dark:bg-[#23122E] rounded-full overflow-hidden p-0.5 border border-[#6E1996]/20 dark:border-[#6E1996]/30">
+                <div
+                  data-testid="monthly-progress-bar"
+                  className="h-full rounded-full transition-all duration-500 ease-out"
+                  style={{
+                    width: `${isRegularPioneer ? regularMonthlyCalculation.progressPercent : auxMonthlyCalculation.progressPercent}%`,
+                    backgroundColor: '#6E1996',
+                  }}
+                />
               </div>
 
-              <div className="pt-1.5 border-t border-[#DDE3EA] dark:border-[#202E42] flex items-center justify-between text-[11px] text-[#5C6B7E] dark:text-[#CBD5E1]">
-                <span>📏 {t('home.monthGoal')}</span>
-                <span className="font-bold text-[#0A111E] dark:text-[#F8FAFC]">
-                  {auxMonthlyTargetHours}:00 h {currentMonthReport?.hasReducedRequirement ? t('home.specialMonthReduced') : t('home.standardRequirement')}
-                </span>
+              <div className="pt-0.5 space-y-1 text-xs text-[#0A111E] dark:text-[#F8FAFC]">
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-1.5 font-semibold text-[11px]" style={{ color: '#6E1996' }}>
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>{t('home.completedCount', { time: formatMinutesToHHMM(currentMonthMinutes) })}</span>
+                  </span>
+                  <span
+                    data-testid="monthly-remaining-label"
+                    className="flex items-center gap-1.5 text-[#5C6B7E] dark:text-[#CBD5E1] font-semibold text-[11px]"
+                  >
+                    <Hourglass className="w-3.5 h-3.5" />
+                    <span>
+                      {(isRegularPioneer ? regularMonthlyCalculation.isTargetReached : auxMonthlyCalculation.isTargetReached)
+                        ? t('home.goalReached')
+                        : t('home.remainingCount', {
+                            time: isRegularPioneer
+                              ? regularMonthlyCalculation.formattedRemaining
+                              : auxMonthlyCalculation.formattedRemaining,
+                          })}
+                    </span>
+                  </span>
+                </div>
+
+                <div className="pt-1.5 border-t border-[#E9D5F5] dark:border-[#381B45] flex items-center justify-between text-[11px] text-[#5C6B7E] dark:text-[#CBD5E1]">
+                  <span>📏 {t('home.monthGoal')}</span>
+                  <span className="font-bold text-[#0A111E] dark:text-[#F8FAFC]">
+                    {isRegularPioneer
+                      ? `${regularMonthlyTarget}:00 h`
+                      : `${auxMonthlyTargetHours}:00 h ${currentMonthReport?.hasReducedRequirement ? t('home.specialMonthReduced') : t('home.standardRequirement')}`}
+                  </span>
+                </div>
               </div>
             </div>
           </div>

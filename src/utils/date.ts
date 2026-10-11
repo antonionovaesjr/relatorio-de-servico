@@ -145,5 +145,77 @@ export function suggestVisitTime(): string {
   return `${String(hours).padStart(2, '0')}:${String(roundedMinutes).padStart(2, '0')}`;
 }
 
+export interface MonthlyTimeCalculation {
+  targetMinutes: number;
+  completedMinutes: number;
+  remainingMinutes: number;
+  formattedRemaining: string; // Ex: "6:15" ou "10:00"
+  formattedRemainingHours: string; // Ex: "6h15" ou "10h"
+  isTargetReached: boolean;
+  progressPercent: number;
+}
+
+/**
+ * Converte valor de tempo (minutos numéricos, "HH:MM", "43h45", "43h", ou decimal) para minutos inteiros.
+ */
+export function parseTimeToMinutesFlexible(value: number | string): number {
+  if (typeof value === 'number') {
+    return Math.max(0, Math.round(value));
+  }
+  const trimmed = value.trim();
+  if (!trimmed) return 0;
+
+  // Formato 43h45 ou 43h ou 43h 45m
+  const hMatch = trimmed.match(/^(\d+)[hH](?:\s*(\d+))?m?$/);
+  if (hMatch) {
+    const hours = parseInt(hMatch[1], 10);
+    const minutes = hMatch[2] ? parseInt(hMatch[2], 10) : 0;
+    return hours * 60 + minutes;
+  }
+
+  // Formato HH:MM
+  if (trimmed.includes(':')) {
+    return parseHHMMToMinutes(trimmed);
+  }
+
+  // Formato decimal ou fallback
+  return parseHHMMToMinutes(trimmed);
+}
+
+/**
+ * Calcula as horas faltantes para atingir a meta no formato HH:MM e minutos.
+ * Suporta completedTime como número de minutos, string "HH:MM", string "43h45" ou "43h".
+ * Garante que não retorne valores negativos.
+ */
+export function calculateRemainingMonthlyTime(
+  targetHours: number,
+  completed: number | string
+): MonthlyTimeCalculation {
+  const targetMinutes = Math.max(0, Math.round((targetHours || 0) * 60));
+  const completedMinutes = parseTimeToMinutesFlexible(completed);
+  const remainingMinutes = Math.max(0, targetMinutes - completedMinutes);
+  const isTargetReached = completedMinutes >= targetMinutes;
+  const progressPercent =
+    targetMinutes > 0
+      ? Math.min(100, Math.round((completedMinutes / targetMinutes) * 100))
+      : 100;
+
+  const formattedRemaining = formatMinutesToHHMM(remainingMinutes);
+
+  const remH = Math.floor(remainingMinutes / 60);
+  const remM = remainingMinutes % 60;
+  const formattedRemainingHours = remM === 0 ? `${remH}h` : `${remH}h${String(remM).padStart(2, '0')}`;
+
+  return {
+    targetMinutes,
+    completedMinutes,
+    remainingMinutes,
+    formattedRemaining,
+    formattedRemainingHours,
+    isTargetReached,
+    progressPercent,
+  };
+}
+
 
 

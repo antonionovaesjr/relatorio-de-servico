@@ -528,6 +528,18 @@ export const HelpView: React.FC = () => {
               <span className="text-[#001E62] dark:text-[#60A5FA] font-bold">•</span>
               <span><strong className="text-[#0A111E] dark:text-white">{t('help.registerPoint3Title')}</strong> {t('help.registerPoint3Text')}</span>
             </li>
+            <li className="flex items-start gap-2">
+              <span className="text-[#001E62] dark:text-[#60A5FA] font-bold">•</span>
+              <span><strong className="text-[#0A111E] dark:text-white">{t('help.registerPoint4Title')}</strong> {t('help.registerPoint4Text')}</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-[#001E62] dark:text-[#60A5FA] font-bold">•</span>
+              <span><strong className="text-[#0A111E] dark:text-white">{t('help.registerPoint5Title')}</strong> {t('help.registerPoint5Text')}</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-[#001E62] dark:text-[#60A5FA] font-bold">•</span>
+              <span><strong className="text-[#0A111E] dark:text-white">{t('help.registerPoint6Title')}</strong> {t('help.registerPoint6Text')}</span>
+            </li>
           </ul>
         </section>
 

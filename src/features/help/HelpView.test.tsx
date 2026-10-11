@@ -59,4 +59,19 @@ describe('HelpView - FAQ por Designação', () => {
     expect(screen.getByText('Como o aplicativo funciona para o Publicador?')).toBeTruthy();
     expect(screen.getByText('Por que a tela Início não exibe barra de meta de horas?')).toBeTruthy();
   });
+
+  it('deve exibir todos os pontos atualizados no card Registro & Correção', () => {
+    render(
+      <I18nProvider language="pt-BR">
+        <HelpView />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('Lançamento de Horas & Cronômetro:')).toBeTruthy();
+    expect(screen.getByText('Correção Rápida:')).toBeTruthy();
+    expect(screen.getByText('🎖️ Crédito de Horas (Pioneiro Regular):')).toBeTruthy();
+    expect(screen.getByText('📍 Revisitas com GPS Automático:')).toBeTruthy();
+    expect(screen.getByText('⏰ Sugestão Inteligente de Horário:')).toBeTruthy();
+    expect(screen.getByText('🗺️ Navegação no Google Maps:')).toBeTruthy();
+  });
 });
